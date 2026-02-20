@@ -1,8 +1,8 @@
 namespace SpriteKind {
     export const tower = SpriteKind.create()
 }
-sprites.onOverlap(SpriteKind.tower, SpriteKind.Player, function (sprite, otherSprite) {
-	
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
+    sprites.destroy(sprite)
 })
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     BULLET_SPEED = 100
@@ -54,7 +54,6 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
         `, artillery, BULLET_SPEED * Math.cos(theta), BULLET_SPEED * Math.sin(theta))
     bullet1.rotation = theta
 })
-let statusbar: StatusBarSprite = null
 let enemy1: Sprite = null
 let ENEMY_SPEED = 0
 let bullet1: Sprite = null
@@ -169,8 +168,8 @@ artillery = sprites.create(img`
     ........................
     ........................
     `, SpriteKind.tower)
-artillery.setScale(0.6, ScaleAnchor.Middle)
 artillery.y = 115
+artillery.setScale(0.6, ScaleAnchor.Middle)
 forever(function () {
     ENEMY_SPEED = 10
     enemy1 = sprites.create(assets.image`myImage0`, SpriteKind.Enemy)
@@ -179,7 +178,5 @@ forever(function () {
     dy = 110
     theta = Math.atan2(dy, dx)
     enemy1.setVelocity(ENEMY_SPEED * Math.cos(theta), ENEMY_SPEED * Math.sin(theta))
-    statusbar = statusbars.create(20, 1, StatusBarKind.EnemyHealth)
-    statusbar.attachToSprite(enemy1)
-    pause(randint(0, 5000))
+    pause(randint(500, 3000))
 })
