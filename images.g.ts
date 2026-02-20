@@ -198,7 +198,8 @@ cc66666666664c66e4e44e44e44feeee66c46666666666cc
 
     helpers._registerFactory("song", function(name: string) {
         switch(helpers.stringTrim(name)) {
-
+            case "song1":
+            case "mySong":return hex`00780004080200`;
         }
         return null;
     })
