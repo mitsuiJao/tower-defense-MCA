@@ -1,6 +1,9 @@
 namespace SpriteKind {
     export const tower = SpriteKind.create()
 }
+sprites.onOverlap(SpriteKind.tower, SpriteKind.Player, function (sprite, otherSprite) {
+	
+})
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     BULLET_SPEED = 100
     dx = target.x - artillery.x
@@ -28,8 +31,6 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     BULLET_SPEED = 100
-    artillery_end_x = 0
-    artillery_end_y = 0
     dx = target.x - artillery.x
     dy = target.y - artillery.y
     theta = Math.atan2(dy, dx)
@@ -53,9 +54,10 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
         `, artillery, BULLET_SPEED * Math.cos(theta), BULLET_SPEED * Math.sin(theta))
     bullet1.rotation = theta
 })
+let statusbar: StatusBarSprite = null
+let enemy1: Sprite = null
+let ENEMY_SPEED = 0
 let bullet1: Sprite = null
-let artillery_end_y = 0
-let artillery_end_x = 0
 let bullet2: Sprite = null
 let theta = 0
 let dy = 0
@@ -66,7 +68,6 @@ let target: Sprite = null
 target = sprites.create(assets.image`myImage`, SpriteKind.Player)
 controller.moveSprite(target)
 target.setStayInScreen(true)
-let enemy1 = sprites.create(assets.image`myImage0`, SpriteKind.Enemy)
 let tower = sprites.create(assets.image`myImage2`, SpriteKind.tower)
 tower.setScale(0.6, ScaleAnchor.Middle)
 tower.y = 115
@@ -171,5 +172,14 @@ artillery = sprites.create(img`
 artillery.setScale(0.6, ScaleAnchor.Middle)
 artillery.y = 115
 forever(function () {
-    target.sayText(Math.trunc(target.x))
+    ENEMY_SPEED = 10
+    enemy1 = sprites.create(assets.image`myImage0`, SpriteKind.Enemy)
+    enemy1.setPosition(randint(10, 150), 0)
+    dx = tower.x - enemy1.x
+    dy = 110
+    theta = Math.atan2(dy, dx)
+    enemy1.setVelocity(ENEMY_SPEED * Math.cos(theta), ENEMY_SPEED * Math.sin(theta))
+    statusbar = statusbars.create(20, 1, StatusBarKind.EnemyHealth)
+    statusbar.attachToSprite(enemy1)
+    pause(randint(0, 5000))
 })

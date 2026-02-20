@@ -19,6 +19,21 @@
         "mimeType": "image/x-mkcd-f4",
         "displayName": "myImage2"
     },
+    "image6": {
+        "data": "hwQQABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "artillery_endpoint0"
+    },
+    "image5": {
+        "data": "hwQBAAEAAAAJAAAA",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "artillery_endpoint"
+    },
+    "image7": {
+        "data": "hwQQABAAAAAAAAAAAAAAAAAAAAAAAAAAAPD//w8AAAAA/zMz/wAAAAA/MzPzDwAAAD8zMzP/AAAAPzMzs/sPAAD/MzO7u/8AAPA/M7u7+wAA/zMzu7v/AAA/EzGz+w8AAD8TMTP/AAAAPzMz8w8AAAD/MzP/AAAAAPD//w8AAAAAAAAAAAAAAA==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "myImage3"
+    },
     "*": {
         "mimeType": "image/x-mkcd-f4",
         "dataEncoding": "base64",
