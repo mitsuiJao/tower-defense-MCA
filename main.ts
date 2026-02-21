@@ -76,9 +76,9 @@ function init () {
     ENEMY1_HP = 10
     ENEMY1_SPEED = 10
     ENEMY2_HP = 30
-    ENEMY2_SPEED = 10
-    ENEMY2_AMP = 15
-    ENEMY2_T = 1000
+    ENEMY2_SPEED = 0.2
+    ENEMY2_AMP = 30
+    ENEMY2_T = 3000
     BULLET_SPEED = 100
     TOWER_MAXHP = 500
 }
@@ -279,7 +279,7 @@ function enemy2_appear () {
     200,
     true
     )
-    x0 = 0
+    x0 = 40
     y0 = 0
     enemy_theta(enemy2, ENEMY2_HP, x0, y0)
     sprites.setDataNumber(enemy2, "hp", ENEMY2_HP)
@@ -445,6 +445,9 @@ artillery.setScale(0.6, ScaleAnchor.Middle)
 artillery.y = 115
 game.onUpdate(function () {
     for (let i of enemy2_list) {
+        if (true) {
+        	
+        }
         t = game.runtime() - sprites.readDataNumber(i, "spawn_time")
         theta = sprites.readDataNumber(i, "theta")
         dist = t / 20 * ENEMY2_SPEED
@@ -452,7 +455,7 @@ game.onUpdate(function () {
         wave = Math.sin(rad) * ENEMY2_AMP
         cosA = Math.cos(theta)
         sinA = Math.sin(theta)
-        i.setPosition(sprites.readDataNumber(i, "x0") + dist * cosA + wave * (sinA * -1), sprites.readDataNumber(i, "y0") + dist * sinA + wave * (cosA * -1))
+        i.setPosition(sprites.readDataNumber(i, "x0") + dist * cosA + wave * (sinA * -1), sprites.readDataNumber(i, "y0") + dist * sinA + wave * cosA)
     }
 })
 forever(function () {
