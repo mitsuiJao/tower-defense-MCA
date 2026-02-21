@@ -1,15 +1,16 @@
 namespace SpriteKind {
     export const tower = SpriteKind.create()
+    export const tower_kind = SpriteKind.create()
 }
-sprites.onOverlap(SpriteKind.Enemy, SpriteKind.tower, function (sprite, otherSprite) {
-    sprite.setVelocity(0, 0)
-})
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
     sprites.destroy(sprite)
     enemy_statusbar.value = sprites.readDataNumber(otherSprite, "hp")
     sprites.changeDataNumberBy(otherSprite, "hp", -5)
     enemy_statusbar.value = sprites.readDataNumber(otherSprite, "hp")
     otherSprite.sayText(sprites.readDataNumber(otherSprite, "hp"))
+    if (sprites.readDataNumber(otherSprite, "hp") <= 0) {
+        sprites.destroy(otherSprite, effects.fire, 100)
+    }
 })
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     BULLET_SPEED = 100
@@ -64,8 +65,17 @@ function init () {
     ENEMY1_HP = 10
     ENEMY_SPEED = 10
     BULLET_SPEED = 100
-    TOWER_HP = 500
+    TOWER_MAXHP = 500
 }
+sprites.onOverlap(SpriteKind.Enemy, SpriteKind.tower_kind, function (sprite, otherSprite) {
+    sprite.setVelocity(0, 0)
+    while (true) {
+        tower_hp += -5
+        tower_statusbar.value = tower_hp
+        otherSprite.sayText(sprites.readDataNumber(otherSprite, "hp"), 500, false)
+        pause(1000)
+    }
+})
 let enemy1: Sprite = null
 let ENEMY_SPEED = 0
 let ENEMY1_HP = 0
@@ -77,20 +87,23 @@ let dx = 0
 let BULLET_SPEED = 0
 let enemy_statusbar: StatusBarSprite = null
 let artillery: Sprite = null
-let TOWER_HP = 0
+let tower_statusbar: StatusBarSprite = null
+let TOWER_MAXHP = 0
+let tower_hp = 0
 let target: Sprite = null
 init()
 target = sprites.create(assets.image`myImage`, SpriteKind.Player)
 controller.moveSprite(target)
 target.setStayInScreen(true)
-let tower = sprites.create(assets.image`myImage2`, SpriteKind.tower)
-tower.setScale(0.6, ScaleAnchor.Middle)
-tower.y = 115
-sprites.setDataNumber(tower, "hp", TOWER_HP)
-let tower_statusbar = statusbars.create(50, 4, StatusBarKind.Health)
-tower_statusbar.max = sprites.readDataNumber(tower, "hp")
-tower_statusbar.value = sprites.readDataNumber(tower, "hp")
-tower_statusbar.attachToSprite(tower, -10, 40)
+let tower2 = sprites.create(assets.image`myImage2`, SpriteKind.tower_kind)
+tower2.setScale(0.6, ScaleAnchor.Middle)
+tower2.y = 115
+tower_hp = TOWER_MAXHP
+tower_statusbar = statusbars.create(50, 4, StatusBarKind.Health)
+tower_statusbar.max = tower_hp
+tower_statusbar.value = tower_hp
+tower2.sayText(sprites.readDataNumber(tower2, "hp"))
+tower_statusbar.attachToSprite(tower2, -10, 40)
 artillery = sprites.create(img`
     ........................
     ........................
@@ -188,7 +201,7 @@ artillery = sprites.create(img`
     ........................
     ........................
     ........................
-    `, SpriteKind.tower)
+    `, SpriteKind.tower_kind)
 artillery.setScale(0.6, ScaleAnchor.Middle)
 artillery.y = 115
 forever(function () {
@@ -301,7 +314,7 @@ forever(function () {
     )
     sprites.setDataNumber(enemy1, "hp", ENEMY1_HP)
     enemy1.setPosition(randint(10, 150), 0)
-    dx = tower.x - enemy1.x
+    dx = tower2.x - enemy1.x
     dy = 110
     theta = Math.atan2(dy, dx)
     enemy1.setVelocity(ENEMY_SPEED * Math.cos(theta), ENEMY_SPEED * Math.sin(theta))
