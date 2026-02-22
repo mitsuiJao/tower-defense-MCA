@@ -13,6 +13,18 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, oth
         sprites.destroy(otherSprite, effects.fire, 100)
     }
 })
+function enemy2_update () {
+    for (let i of enemy2_list) {
+        t = game.runtime() - sprites.readDataNumber(i, "spawn_time")
+        theta = sprites.readDataNumber(i, "theta")
+        dist = t / 20 * ENEMY2_SPEED
+        rad = t % ENEMY2_T / ENEMY2_T * Math.PI * 2
+        wave = Math.sin(rad) * ENEMY2_AMP
+        cosA = Math.cos(theta)
+        sinA = Math.sin(theta)
+        i.setPosition(sprites.readDataNumber(i, "x0") + dist * cosA + wave * (sinA * -1), sprites.readDataNumber(i, "y0") + dist * sinA + wave * cosA)
+    }
+}
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     BULLET_SPEED = 100
     dx = target.x - artillery.x
@@ -39,6 +51,7 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     bullet2.setScale(0.6, ScaleAnchor.Middle)
 })
 sprites.onOverlap(SpriteKind.Enemy, SpriteKind.tower_kind, function (sprite2, otherSprite2) {
+    sprites.setDataBoolean(null, "is_reach", false)
     sprite2.setVelocity(0, 0)
     while (true) {
         tower_hp += -5
@@ -77,8 +90,8 @@ function init () {
     ENEMY1_SPEED = 10
     ENEMY2_HP = 30
     ENEMY2_SPEED = 0.2
-    ENEMY2_AMP = 30
-    ENEMY2_T = 3000
+    ENEMY2_AMP = 15
+    ENEMY2_T = 2000
     BULLET_SPEED = 100
     TOWER_MAXHP = 500
 }
@@ -198,6 +211,7 @@ function enemy1_appear () {
     sprites.setDataNumber(enemy1, "spawn_time", game.runtime())
     sprites.setDataNumber(enemy1, "x0", x0)
     sprites.setDataNumber(enemy1, "y0", y0)
+    sprites.setDataBoolean(enemy1, "is_reach", false)
     enemy1.setVelocity(ENEMY1_SPEED * Math.cos(theta), ENEMY1_SPEED * Math.sin(theta))
     enemy_statusbar = statusbars.create(20, 2, StatusBarKind.Health)
     enemy_statusbar.max = sprites.readDataNumber(enemy1, "hp")
@@ -279,7 +293,7 @@ function enemy2_appear () {
     200,
     true
     )
-    x0 = 40
+    x0 = 0
     y0 = 0
     enemy_theta(enemy2, ENEMY2_HP, x0, y0)
     sprites.setDataNumber(enemy2, "hp", ENEMY2_HP)
@@ -287,6 +301,7 @@ function enemy2_appear () {
     sprites.setDataNumber(enemy2, "spawn_time", game.runtime())
     sprites.setDataNumber(enemy2, "x0", x0)
     sprites.setDataNumber(enemy2, "y0", y0)
+    sprites.setDataBoolean(enemy2, "is_reach", false)
     enemy2_list.push(enemy2)
     enemy2.setVelocity(ENEMY2_SPEED * Math.cos(theta), ENEMY2_SPEED * Math.sin(theta))
     enemy_statusbar = statusbars.create(20, 2, StatusBarKind.Health)
@@ -299,29 +314,29 @@ function enemy_theta (mySprite: Sprite, hp: number, x: number, y: number) {
     dy = 110
     theta = Math.atan2(dy, dx)
 }
-let sinA = 0
-let cosA = 0
-let wave = 0
-let rad = 0
-let dist = 0
-let t = 0
 let enemy2: Sprite = null
 let enemy_statusbar: StatusBarSprite = null
 let y0 = 0
 let x0 = 0
 let enemy1: Sprite = null
-let ENEMY2_T = 0
-let ENEMY2_AMP = 0
-let ENEMY2_SPEED = 0
 let ENEMY2_HP = 0
 let ENEMY1_SPEED = 0
 let ENEMY1_HP = 0
 let bullet1: Sprite = null
 let bullet2: Sprite = null
-let theta = 0
 let dy = 0
 let dx = 0
 let BULLET_SPEED = 0
+let sinA = 0
+let cosA = 0
+let ENEMY2_AMP = 0
+let wave = 0
+let ENEMY2_T = 0
+let rad = 0
+let ENEMY2_SPEED = 0
+let dist = 0
+let theta = 0
+let t = 0
 let artillery: Sprite = null
 let tower_statusbar: StatusBarSprite = null
 let TOWER_MAXHP = 0
@@ -444,19 +459,7 @@ artillery = sprites.create(img`
 artillery.setScale(0.6, ScaleAnchor.Middle)
 artillery.y = 115
 game.onUpdate(function () {
-    for (let i of enemy2_list) {
-        if (true) {
-        	
-        }
-        t = game.runtime() - sprites.readDataNumber(i, "spawn_time")
-        theta = sprites.readDataNumber(i, "theta")
-        dist = t / 20 * ENEMY2_SPEED
-        rad = t % ENEMY2_T / ENEMY2_T * Math.PI * 2
-        wave = Math.sin(rad) * ENEMY2_AMP
-        cosA = Math.cos(theta)
-        sinA = Math.sin(theta)
-        i.setPosition(sprites.readDataNumber(i, "x0") + dist * cosA + wave * (sinA * -1), sprites.readDataNumber(i, "y0") + dist * sinA + wave * cosA)
-    }
+    enemy2_update()
 })
 forever(function () {
     enemy2_appear()
