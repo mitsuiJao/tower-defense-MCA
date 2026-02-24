@@ -2,19 +2,23 @@ namespace SpriteKind {
     export const tower = SpriteKind.create()
     export const tower_kind = SpriteKind.create()
 }
-/**
- * デバッグまだ
- */
+// デバッグまだ
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
     sprites.destroy(sprite)
     sprites.changeDataNumberBy(otherSprite, "hp", -5)
     statusbars.getStatusBarAttachedTo(StatusBarKind.Health, otherSprite).value = sprites.readDataNumber(otherSprite, "hp")
     if (sprites.readDataNumber(otherSprite, "hp") <= 0) {
+        sprites.setDataBoolean(otherSprite, "is_exist", false)
         sprites.destroy(otherSprite, effects.fire, 100)
     }
 })
 function enemy2_update () {
     for (let i of enemy2_list) {
+        if (sprites.readDataBoolean(i, "is_reach")) {
+            continue;
+        }
+        lastX = i.x
+        lastY = i.y
         t = game.runtime() - sprites.readDataNumber(i, "spawn_time")
         theta = sprites.readDataNumber(i, "theta")
         dist = t / 20 * ENEMY2_SPEED
@@ -23,6 +27,12 @@ function enemy2_update () {
         cosA = Math.cos(theta)
         sinA = Math.sin(theta)
         i.setPosition(sprites.readDataNumber(i, "x0") + dist * cosA + wave * (sinA * -1), sprites.readDataNumber(i, "y0") + dist * sinA + wave * cosA)
+        currentDX = sprites.readDataNumber(i, "x") - sinA
+        currentDY = sprites.readDataNumber(i, "y") - lastY
+        if (Math.abs(currentDX) > 0.1 || Math.abs(currentDY) > 0.1) {
+            abs_dx = Math.atan2(currentDY, currentDX) * 180 / Math.PI
+            i.sayText(abs_dx)
+        }
     }
 }
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
@@ -51,13 +61,17 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     bullet2.setScale(0.6, ScaleAnchor.Middle)
 })
 sprites.onOverlap(SpriteKind.Enemy, SpriteKind.tower_kind, function (sprite2, otherSprite2) {
-    sprites.setDataBoolean(null, "is_reach", false)
-    sprite2.setVelocity(0, 0)
-    while (true) {
-        tower_hp += -5
-        tower_statusbar.value = tower_hp
-        otherSprite2.sayText(sprites.readDataNumber(otherSprite2, "hp"), 500, false)
-        pause(1000)
+    if (!(sprites.readDataBoolean(sprite2, "is_reach"))) {
+        sprites.setDataBoolean(sprite2, "is_reach", true)
+        sprite2.setVelocity(0, 0)
+        timer.background(function () {
+            while (sprites.readDataBoolean(sprite2, "is_exist")) {
+                tower_hp += -5
+                tower_statusbar.value = tower_hp
+                otherSprite2.sayText(sprites.readDataNumber(otherSprite2, "hp"), 500, false)
+                pause(1000)
+            }
+        })
     }
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
@@ -212,6 +226,7 @@ function enemy1_appear () {
     sprites.setDataNumber(enemy1, "x0", x0)
     sprites.setDataNumber(enemy1, "y0", y0)
     sprites.setDataBoolean(enemy1, "is_reach", false)
+    sprites.setDataBoolean(enemy1, "is_exist", true)
     enemy1.setVelocity(ENEMY1_SPEED * Math.cos(theta), ENEMY1_SPEED * Math.sin(theta))
     enemy_statusbar = statusbars.create(20, 2, StatusBarKind.Health)
     enemy_statusbar.max = sprites.readDataNumber(enemy1, "hp")
@@ -302,6 +317,7 @@ function enemy2_appear () {
     sprites.setDataNumber(enemy2, "x0", x0)
     sprites.setDataNumber(enemy2, "y0", y0)
     sprites.setDataBoolean(enemy2, "is_reach", false)
+    sprites.setDataBoolean(enemy2, "is_exist", true)
     enemy2_list.push(enemy2)
     enemy2.setVelocity(ENEMY2_SPEED * Math.cos(theta), ENEMY2_SPEED * Math.sin(theta))
     enemy_statusbar = statusbars.create(20, 2, StatusBarKind.Health)
@@ -327,6 +343,9 @@ let bullet2: Sprite = null
 let dy = 0
 let dx = 0
 let BULLET_SPEED = 0
+let abs_dx = 0
+let currentDY = 0
+let currentDX = 0
 let sinA = 0
 let cosA = 0
 let ENEMY2_AMP = 0
@@ -337,6 +356,8 @@ let ENEMY2_SPEED = 0
 let dist = 0
 let theta = 0
 let t = 0
+let lastY = 0
+let lastX = 0
 let artillery: Sprite = null
 let tower_statusbar: StatusBarSprite = null
 let TOWER_MAXHP = 0
