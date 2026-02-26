@@ -140,13 +140,18 @@ function enemy3_appear (state: number, x: number, y: number) {
 }
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
     sprites.destroy(sprite)
-    sprites.changeDataNumberBy(otherSprite, "hp", -1 * BULLETA_ATTACK)
+    sprites.changeDataNumberBy(otherSprite, "hp", -1 * BULLET1_ATTACK)
     statusbars.getStatusBarAttachedTo(StatusBarKind.Health, otherSprite).value = sprites.readDataNumber(otherSprite, "hp")
     if (sprites.readDataNumber(otherSprite, "hp") <= 0) {
         sprites.setDataBoolean(otherSprite, "is_exist", false)
         sprites.destroy(otherSprite, effects.fire, 100)
     }
 })
+function bullet_theta (target: Sprite, artillery: Sprite) {
+    dx = target.x - artillery.x
+    dy = target.y - artillery.y
+    theta = Math.atan2(dy, dx)
+}
 function enemy2_update () {
     for (let i of enemy2_list) {
         if (sprites.readDataBoolean(i, "is_reach")) {
@@ -184,11 +189,7 @@ function list_update (array: any[]) {
     }
 }
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
-    BULLET_SPEED = 100
-    dx = target.x - artillery.x
-    dy = target.y - artillery.y
-    theta = Math.atan2(dy, dx)
-    bullet2 = sprites.createProjectileFromSprite(img`
+    dummy_bullet = sprites.create(img`
         . . . . . b b b b b b . . . . . 
         . . . b b 9 9 9 9 9 9 b b . . . 
         . . b b 9 9 9 9 9 9 9 9 b b . . 
@@ -205,8 +206,12 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
         . . b d 5 d 3 3 3 3 5 5 b b . . 
         . . . b b 5 5 5 5 5 5 b b . . . 
         . . . . . b b b b b b . . . . . 
-        `, artillery, BULLET_SPEED * Math.cos(theta), BULLET_SPEED * Math.sin(theta))
-    bullet2.setScale(0.6, ScaleAnchor.Middle)
+        `, SpriteKind.Player)
+    dummy_bullet.setPosition(artillery.x, artillery.y)
+    bullet2_size = BULLET2_MIN
+    dummy_bullet.setScale(bullet2_size, ScaleAnchor.Middle)
+    bullet2_fired = false
+    freq = 400
 })
 sprites.onOverlap(SpriteKind.Enemy, SpriteKind.tower_kind, function (sprite2, otherSprite2) {
     if (!(sprites.readDataBoolean(sprite2, "is_reach"))) {
@@ -224,9 +229,7 @@ sprites.onOverlap(SpriteKind.Enemy, SpriteKind.tower_kind, function (sprite2, ot
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.InBackground)
-    dx = target.x - artillery.x
-    dy = target.y - artillery.y
-    theta = Math.atan2(dy, dx)
+    bullet_theta(target, artillery)
     bullet1 = sprites.createProjectileFromSprite(img`
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
@@ -244,8 +247,38 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
         . . . . . . . . . . . . . . . . 
-        `, artillery, BULLET_SPEED * Math.cos(theta), BULLET_SPEED * Math.sin(theta))
+        `, artillery, BULLET1_SPEED * Math.cos(theta), BULLET1_SPEED * Math.sin(theta))
     bullet1.rotation = theta
+})
+controller.B.onEvent(ControllerButtonEvent.Released, function () {
+    if (!(bullet2_fired)) {
+        bullet_theta(target, artillery)
+        bullet2 = sprites.createProjectileFromSprite(img`
+            . . . . . b b b b b b . . . . . 
+            . . . b b 9 9 9 9 9 9 b b . . . 
+            . . b b 9 9 9 9 9 9 9 9 b b . . 
+            . b b 9 d 9 9 9 9 9 9 9 9 b b . 
+            . b 9 d 9 9 9 9 9 1 1 1 9 9 b . 
+            b 9 d d 9 9 9 9 9 1 1 1 9 9 9 b 
+            b 9 d 9 9 9 9 9 9 1 1 1 9 9 9 b 
+            b 9 3 9 9 9 9 9 9 9 9 9 1 9 9 b 
+            b 5 3 d 9 9 9 9 9 9 9 9 9 9 9 b 
+            b 5 3 3 9 9 9 9 9 9 9 9 9 d 9 b 
+            b 5 d 3 3 9 9 9 9 9 9 9 d d 9 b 
+            . b 5 3 3 3 d 9 9 9 9 d d 5 b . 
+            . b d 5 3 3 3 3 3 3 3 d 5 b b . 
+            . . b d 5 d 3 3 3 3 5 5 b b . . 
+            . . . b b 5 5 5 5 5 5 b b . . . 
+            . . . . . b b b b b b . . . . . 
+            `, artillery, BULLET2_SPEED * Math.cos(theta), BULLET2_SPEED * Math.sin(theta))
+        bullet2.rotation = theta
+        sprites.setDataNumber(bullet2, "power", bullet2_size)
+        bullet2.sayText(sprites.readDataNumber(bullet2, "power"))
+        bullet2.setScale(bullet2_size, ScaleAnchor.Middle)
+        sprites.destroy(dummy_bullet)
+        bullet2_fired = true
+        bullet2_size = BULLET2_MIN
+    }
 })
 function init () {
     ENEMY1_HP = 10
@@ -259,18 +292,22 @@ function init () {
     ENEMY31_SPEED = 10
     ENEMY32_SPEED = 10
     JITTER_AMP = 1
-    BULLET_SPEED = 100
-    BULLETA_ATTACK = 5
+    BULLET1_SPEED = 100
+    BULLET1_ATTACK = 5
+    BULLET2_SPEED = 100
+    BULLET2_MIN = 0.4
     TOWER_MAXHP = 500
 }
 function enemy3_divide (enemy3: Sprite) {
-    sprites.setDataBoolean(enemy3, "is_exist", false)
-    sprites.destroy(enemy3, effects.spray, 100)
-    for (let カウンター = 0; カウンター <= 2; カウンター++) {
-        enemy3_appear(2, enemy3.x, enemy3.y)
-        child = enemy3_list[enemy3_list.length - 1]
-        spreadTheta = sprites.readDataNumber(child, "theta") + (カウンター - 1) * 0.5
-        child.setVelocity(ENEMY32_SPEED * Math.cos(spreadTheta), ENEMY32_SPEED * Math.sin(spreadTheta))
+    if (sprites.readDataBoolean(enemy3, "is_exist")) {
+        sprites.setDataBoolean(enemy3, "is_exist", false)
+        sprites.destroy(enemy3, effects.spray, 100)
+        for (let カウンター = 0; カウンター <= 2; カウンター++) {
+            enemy3_appear(2, enemy3.x, enemy3.y)
+            child = enemy3_list[enemy3_list.length - 1]
+            spreadTheta = sprites.readDataNumber(child, "theta") + (カウンター - 1) * 0.5
+            child.setVelocity(ENEMY32_SPEED * Math.cos(spreadTheta), ENEMY32_SPEED * Math.sin(spreadTheta))
+        }
     }
 }
 function distance (mySprite: Sprite, mySprite2: Sprite) {
@@ -530,11 +567,15 @@ let ENEMY32_SPEED = 0
 let ENEMY2_HP = 0
 let ENEMY1_SPEED = 0
 let ENEMY1_HP = 0
-let bullet1: Sprite = null
+let BULLET2_SPEED = 0
 let bullet2: Sprite = null
-let dy = 0
-let dx = 0
-let BULLET_SPEED = 0
+let BULLET1_SPEED = 0
+let bullet1: Sprite = null
+let freq = 0
+let bullet2_fired = false
+let BULLET2_MIN = 0
+let bullet2_size = 0
+let dummy_bullet: Sprite = null
 let output_list: Sprite[] = []
 let abs_dx = 0
 let currentDY = 0
@@ -550,7 +591,9 @@ let dist = 0
 let t = 0
 let lastY = 0
 let lastX = 0
-let BULLETA_ATTACK = 0
+let dy = 0
+let dx = 0
+let BULLET1_ATTACK = 0
 let enemy_statusbar: StatusBarSprite = null
 let ENEMY31_SPEED = 0
 let enemy3_list: Sprite[] = []
@@ -815,4 +858,52 @@ game.onUpdateInterval(2000, function () {
 forever(function () {
     enemy3_appear(1, 0, 0)
     pause(5000)
+})
+game.onUpdateInterval(100, function () {
+    if (bullet2_size < 2) {
+        if (controller.B.isPressed() && !(bullet2_fired)) {
+            bullet_theta(target, artillery)
+            dummy_bullet.rotation = theta
+            bullet2_size += 0.1
+            dummy_bullet.setScale(bullet2_size, ScaleAnchor.Middle)
+            music.play(music.createSoundEffect(
+            WaveShape.Triangle,
+            freq,
+            freq + 100,
+            105,
+            105,
+            100,
+            SoundExpressionEffect.Tremolo,
+            InterpolationCurve.Linear
+            ), music.PlaybackMode.InBackground)
+            freq += 100
+        }
+    } else {
+        bullet_theta(target, artillery)
+        bullet2 = sprites.createProjectileFromSprite(img`
+            . . . . . b b b b b b . . . . . 
+            . . . b b 9 9 9 9 9 9 b b . . . 
+            . . b b 9 9 9 9 9 9 9 9 b b . . 
+            . b b 9 d 9 9 9 9 9 9 9 9 b b . 
+            . b 9 d 9 9 9 9 9 1 1 1 9 9 b . 
+            b 9 d d 9 9 9 9 9 1 1 1 9 9 9 b 
+            b 9 d 9 9 9 9 9 9 1 1 1 9 9 9 b 
+            b 9 3 9 9 9 9 9 9 9 9 9 1 9 9 b 
+            b 5 3 d 9 9 9 9 9 9 9 9 9 9 9 b 
+            b 5 3 3 9 9 9 9 9 9 9 9 9 d 9 b 
+            b 5 d 3 3 9 9 9 9 9 9 9 d d 9 b 
+            . b 5 3 3 3 d 9 9 9 9 d d 5 b . 
+            . b d 5 3 3 3 3 3 3 3 d 5 b b . 
+            . . b d 5 d 3 3 3 3 5 5 b b . . 
+            . . . b b 5 5 5 5 5 5 b b . . . 
+            . . . . . b b b b b b . . . . . 
+            `, artillery, BULLET2_SPEED * Math.cos(theta), BULLET2_SPEED * Math.sin(theta))
+        bullet2.rotation = theta
+        sprites.setDataNumber(bullet2, "power", bullet2_size)
+        bullet2.sayText(sprites.readDataNumber(bullet2, "power"))
+        bullet2.setScale(bullet2_size, ScaleAnchor.Middle)
+        sprites.destroy(dummy_bullet)
+        bullet2_fired = true
+        bullet2_size = BULLET2_MIN
+    }
 })
