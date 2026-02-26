@@ -114,13 +114,14 @@ function enemy3_appear (state: number, x: number, y: number) {
     )
     if (state == 1) {
         enemy3.scale = 1.2
-        sprites.setDataNumber(enemy3, "hp", ENEMY32_HP)
-        x0 = x
-        y0 = y
-    } else {
         sprites.setDataNumber(enemy3, "hp", ENEMY31_HP)
         x0 = 0
         y0 = 0
+    } else {
+        sprites.setDataNumber(enemy3, "hp", ENEMY32_HP)
+        sprites.setDataBoolean(enemy3, "is_jitter", false)
+        x0 = x
+        y0 = y
     }
     enemy_theta(enemy3, 1, x0, y0)
     sprites.setDataNumber(enemy3, "theta", theta)
@@ -131,7 +132,6 @@ function enemy3_appear (state: number, x: number, y: number) {
     sprites.setDataBoolean(enemy3, "is_reach", false)
     sprites.setDataBoolean(enemy3, "is_exist", true)
     sprites.setDataBoolean(enemy3, "is_divide", false)
-    sprites.setDataBoolean(enemy3, "is_jitter", false)
     enemy3_list.push(enemy3)
     enemy3.setVelocity(ENEMY31_SPEED * Math.cos(theta), ENEMY31_SPEED * Math.sin(theta))
     enemy_statusbar = statusbars.create(20, 2, StatusBarKind.Health)
@@ -173,8 +173,13 @@ function enemy2_update () {
 function list_update (array: any[]) {
     output_list = []
     for (let i of array) {
+        if (i.x < -50 || i.x > 200 || (i.y < -50 || i.y > 170)) {
+            sprites.setDataBoolean(i, "is_exist", false)
+        }
         if (sprites.readDataBoolean(i, "is_exist")) {
             output_list.push(i)
+        } else {
+            sprites.destroy(i)
         }
     }
 }
@@ -259,7 +264,14 @@ function init () {
     TOWER_MAXHP = 500
 }
 function enemy3_divide (enemy3: Sprite) {
-    enemy3_appear(1, 1, 1)
+    sprites.setDataBoolean(enemy3, "is_exist", false)
+    sprites.destroy(enemy3, effects.spray, 100)
+    for (let カウンター = 0; カウンター <= 2; カウンター++) {
+        enemy3_appear(2, enemy3.x, enemy3.y)
+        child = enemy3_list[enemy3_list.length - 1]
+        spreadTheta = sprites.readDataNumber(child, "theta") + (カウンター - 1) * 0.5
+        child.setVelocity(ENEMY32_SPEED * Math.cos(spreadTheta), ENEMY32_SPEED * Math.sin(spreadTheta))
+    }
 }
 function distance (mySprite: Sprite, mySprite2: Sprite) {
     dx = mySprite.x - mySprite2.x
@@ -272,7 +284,7 @@ function enemy3_update () {
             continue;
         }
         distance(i, tower2)
-        if (!(sprites.readDataBoolean(i, "is_jitter")) && dist < 50 && sprites.readDataNumber(i, "state") == 1) {
+        if (!(sprites.readDataBoolean(i, "is_jitter")) && dist < 70 && sprites.readDataNumber(i, "state") == 1) {
             sprites.setDataBoolean(i, "is_jitter", true)
             i.setVelocity(0, 0)
             tmp1 = i.x
@@ -511,6 +523,8 @@ let enemy2: Sprite = null
 let enemy1: Sprite = null
 let tmp2 = 0
 let tmp1 = 0
+let spreadTheta = 0
+let child: Sprite = null
 let JITTER_AMP = 0
 let ENEMY32_SPEED = 0
 let ENEMY2_HP = 0
@@ -541,10 +555,10 @@ let enemy_statusbar: StatusBarSprite = null
 let ENEMY31_SPEED = 0
 let enemy3_list: Sprite[] = []
 let theta = 0
-let ENEMY31_HP = 0
+let ENEMY32_HP = 0
 let y0 = 0
 let x0 = 0
-let ENEMY32_HP = 0
+let ENEMY31_HP = 0
 let enemy3: Sprite = null
 let artillery: Sprite = null
 let tower_statusbar: StatusBarSprite = null
