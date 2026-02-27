@@ -139,8 +139,12 @@ function enemy3_appear (state: number, x: number, y: number) {
     enemy_statusbar.attachToSprite(enemy3)
 }
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
-    sprites.destroy(sprite)
-    sprites.changeDataNumberBy(otherSprite, "hp", -1 * BULLET1_ATTACK)
+    if (sprites.readDataNumber(sprite, "type") == 1) {
+        sprites.destroy(sprite)
+        sprites.changeDataNumberBy(otherSprite, "hp", -1 * BULLET1_ATTACK)
+    } else {
+        sprites.changeDataNumberBy(sprite, "hp", -1 * BULLET1_ATTACK)
+    }
     statusbars.getStatusBarAttachedTo(StatusBarKind.Health, otherSprite).value = sprites.readDataNumber(otherSprite, "hp")
     if (sprites.readDataNumber(otherSprite, "hp") <= 0) {
         sprites.setDataBoolean(otherSprite, "is_exist", false)
@@ -249,6 +253,7 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
         . . . . . . . . . . . . . . . . 
         `, artillery, BULLET1_SPEED * Math.cos(theta), BULLET1_SPEED * Math.sin(theta))
     bullet1.rotation = theta
+    sprites.setDataNumber(bullet1, "type", 1)
 })
 controller.B.onEvent(ControllerButtonEvent.Released, function () {
     if (!(bullet2_fired)) {
@@ -273,13 +278,20 @@ controller.B.onEvent(ControllerButtonEvent.Released, function () {
             `, artillery, BULLET2_SPEED * Math.cos(theta), BULLET2_SPEED * Math.sin(theta))
         bullet2.rotation = theta
         sprites.setDataNumber(bullet2, "power", bullet2_size)
-        bullet2.sayText(sprites.readDataNumber(bullet2, "power"))
+        pow(BULLET2_POWER, sprites.readDataNumber(bullet2, "power"))
+        sprites.setDataNumber(artillery, "state", Math.floor(_return))
+        sprites.setDataNumber(bullet2, "type", 2)
         bullet2.setScale(bullet2_size, ScaleAnchor.Middle)
         sprites.destroy(dummy_bullet)
+        bullet2.sayText(sprites.readDataNumber(bullet2, "state"))
         bullet2_fired = true
         bullet2_size = BULLET2_MIN
     }
 })
+// ENEMY2_AMP: 振れ幅
+// ENEMY2_T: 振れ周期
+// JITTER_AMP: enemy3ジッター振れ幅
+// BULLET2_POWER: 強さの係数
 function init () {
     ENEMY1_HP = 10
     ENEMY1_SPEED = 10
@@ -296,7 +308,10 @@ function init () {
     BULLET1_ATTACK = 5
     BULLET2_SPEED = 100
     BULLET2_MIN = 0.4
+    BULLET2_POWER = 1.8
+    BULLET2_ATTACK = 10
     TOWER_MAXHP = 500
+    VOLUME = 200
 }
 function enemy3_divide (enemy3: Sprite) {
     if (sprites.readDataBoolean(enemy3, "is_exist")) {
@@ -556,17 +571,27 @@ function enemy_theta (mySprite: Sprite, hp: number, x: number, y: number) {
     dy = 110
     theta = Math.atan2(dy, dx)
 }
+// y = x ^ n
+function pow (x: number, n: number) {
+    _return = 1
+    for (let index = 0; index < n; index++) {
+        _return = x * _return
+    }
+}
 let enemy2: Sprite = null
 let enemy1: Sprite = null
 let tmp2 = 0
 let tmp1 = 0
 let spreadTheta = 0
 let child: Sprite = null
+let BULLET2_ATTACK = 0
 let JITTER_AMP = 0
 let ENEMY32_SPEED = 0
 let ENEMY2_HP = 0
 let ENEMY1_SPEED = 0
 let ENEMY1_HP = 0
+let _return = 0
+let BULLET2_POWER = 0
 let BULLET2_SPEED = 0
 let bullet2: Sprite = null
 let BULLET1_SPEED = 0
@@ -610,7 +635,9 @@ let tower_hp = 0
 let tower2: Sprite = null
 let target: Sprite = null
 let enemy2_list: Sprite[] = []
+let VOLUME = 0
 init()
+music.setVolume(VOLUME)
 scene.setBackgroundImage(img`
     8888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888b888886888888588888888888888b8888888888888
     8888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888b888886888888588888888888888b8888888888888
@@ -870,10 +897,10 @@ game.onUpdateInterval(100, function () {
             WaveShape.Triangle,
             freq,
             freq + 100,
-            105,
-            105,
-            100,
-            SoundExpressionEffect.Tremolo,
+            VOLUME + 100,
+            VOLUME + 100,
+            110,
+            SoundExpressionEffect.None,
             InterpolationCurve.Linear
             ), music.PlaybackMode.InBackground)
             freq += 100
@@ -900,9 +927,12 @@ game.onUpdateInterval(100, function () {
             `, artillery, BULLET2_SPEED * Math.cos(theta), BULLET2_SPEED * Math.sin(theta))
         bullet2.rotation = theta
         sprites.setDataNumber(bullet2, "power", bullet2_size)
-        bullet2.sayText(sprites.readDataNumber(bullet2, "power"))
+        pow(BULLET2_POWER, sprites.readDataNumber(bullet2, "power"))
+        sprites.setDataNumber(bullet2, "state", Math.floor(_return))
+        sprites.setDataNumber(bullet2, "type", 2)
         bullet2.setScale(bullet2_size, ScaleAnchor.Middle)
         sprites.destroy(dummy_bullet)
+        bullet2.sayText(sprites.readDataNumber(bullet2, "state"))
         bullet2_fired = true
         bullet2_size = BULLET2_MIN
     }
