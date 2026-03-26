@@ -1,6 +1,7 @@
 namespace SpriteKind {
     export const tower = SpriteKind.create()
     export const tower_kind = SpriteKind.create()
+    export const damy_projectile = SpriteKind.create()
 }
 function enemy3_appear (state: number, x: number, y: number) {
     enemy3 = sprites.create(assets.image`myImage0`, SpriteKind.Enemy)
@@ -140,9 +141,106 @@ function enemy3_appear (state: number, x: number, y: number) {
 }
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
     if (sprites.readDataNumber(sprite, "type") == 1) {
-        sprites.destroy(sprite)
+        music.play(music.melodyPlayable(music.knock), music.PlaybackMode.InBackground)
+        sprite.setVelocity(0, 0)
+        animation.runImageAnimation(
+        sprite,
+        [img`
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . 3 3 . . . . . . . 
+            . . . . . . 3 1 1 3 . . . . . . 
+            . . . . . . 3 1 1 3 . . . . . . 
+            . . 3 2 2 3 1 1 1 1 3 2 2 . . . 
+            . . 3 3 1 1 1 1 1 1 1 1 3 3 . . 
+            . . 3 3 1 1 1 1 1 1 1 1 3 3 . . 
+            . . . 3 1 1 1 1 1 1 1 1 3 . . . 
+            . . . . 3 1 1 1 1 1 1 3 . . . . 
+            . . . . 2 1 1 1 1 1 1 2 . . . . 
+            . . . . 2 1 1 3 3 1 1 2 . . . . 
+            . . . . 3 3 3 2 2 2 3 3 . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            `,img`
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . 2 2 . . . . . . . 
+            . . . . . . 3 1 1 3 . . . . . . 
+            . . . . . 2 1 1 1 1 2 . . . . . 
+            . . . . . 2 1 1 1 1 2 . . . . . 
+            . . . . . . 3 1 1 3 . . . . . . 
+            . . . . . . . 2 2 . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            `,img`
+            . . . . . . 3 3 . . . . . . . . 
+            . . . . . . 3 1 3 . . . . . . . 
+            . . 3 3 . . 3 1 3 . . 3 3 . . . 
+            . . 3 1 3 . 3 1 3 2 3 1 3 . . . 
+            . . . 3 1 3 3 1 3 2 1 3 . . . . 
+            3 3 3 3 2 1 3 1 1 1 3 . . . . . 
+            3 1 1 1 1 1 1 1 1 2 3 3 3 3 3 3 
+            . 3 3 3 2 3 1 1 1 1 1 1 1 1 1 3 
+            . . . . . 2 1 1 1 3 3 2 3 3 3 . 
+            . . . . 3 1 3 1 3 1 2 . . . . . 
+            . . . 3 1 3 2 1 3 3 1 3 . . . . 
+            . . 3 1 3 . 2 1 3 . 3 1 3 . . . 
+            . . 3 3 . . 3 1 3 . . 3 3 . . . 
+            . . . . . . 3 1 3 . . . . . . . 
+            . . . . . . 3 1 3 . . . . . . . 
+            . . . . . . 3 3 . . . . . . . . 
+            `,img`
+            . . 3 3 . . . 3 3 . . . . . . . 
+            . 3 1 1 2 . . 3 1 3 . . 3 3 3 . 
+            . 3 1 1 2 . . 3 1 3 . 3 1 1 3 . 
+            . . 3 2 2 . . 2 1 2 . 2 1 1 3 . 
+            . 3 3 . . . . . 2 2 . 2 2 2 . . 
+            3 1 1 2 2 . . . . . . . 3 3 . . 
+            3 1 1 1 2 . . . . . . 2 1 1 3 3 
+            3 1 1 2 . . . . . . 3 1 1 1 1 3 
+            . 3 2 2 . . . . . . . 2 1 1 3 . 
+            . . . . . . . 2 . . . . 3 3 . . 
+            . . 2 2 2 . 2 1 2 . . 2 2 2 . . 
+            . 3 1 1 2 2 3 1 1 2 . 2 1 1 3 3 
+            3 1 1 1 2 2 1 1 1 2 . 2 1 1 1 3 
+            3 1 1 3 . . 3 1 3 . . . 3 1 1 3 
+            3 3 3 . . . . 3 3 . . . . 3 3 . 
+            . . . . . . . . . . . . . . . . 
+            `,img`
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . 3 . . . . . 
+            . . . . . 3 . . . . 3 3 . . . . 
+            . . . . 3 3 . . . . . 3 . . . . 
+            . . . . 3 . . . 3 . . . . . . . 
+            . . . . . . . . 3 . . . . . . . 
+            . 3 . . . . . . . . . . 3 . . . 
+            3 3 . . . . . . . . . . 3 3 . . 
+            3 . . . . . . . . . . . . 3 . . 
+            . . . . . . . . . . . . . . . . 
+            . . . 3 . . . 3 . . . . . 3 . . 
+            . . 3 3 . . . 3 . . . . . 3 3 . 
+            . . 3 . . . . 3 . . . . . . 3 . 
+            `],
+        50,
+        false
+        )
+        sprite.setKind(SpriteKind.damy_projectile)
+        timer.after(250, function () {
+            sprites.destroy(sprite)
+        })
         sprites.changeDataNumberBy(otherSprite, "hp", -1 * BULLET1_ATTACK)
     } else {
+        music.play(music.melodyPlayable(music.knock), music.PlaybackMode.InBackground)
         sprites.changeDataNumberBy(sprite, "hp", -1 * BULLET1_ATTACK)
     }
     statusbars.getStatusBarAttachedTo(StatusBarKind.Health, otherSprite).value = sprites.readDataNumber(otherSprite, "hp")
@@ -213,9 +311,6 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
         `, SpriteKind.Player)
     dummy_bullet.setPosition(artillery.x, artillery.y)
     bullet2_size = BULLET2_MIN
-    dummy_bullet.setScale(bullet2_size, ScaleAnchor.Middle)
-    bullet2_fired = false
-    freq = 400
 })
 sprites.onOverlap(SpriteKind.Enemy, SpriteKind.tower_kind, function (sprite2, otherSprite2) {
     if (!(sprites.readDataBoolean(sprite2, "is_reach"))) {
@@ -291,7 +386,7 @@ controller.B.onEvent(ControllerButtonEvent.Released, function () {
 // ENEMY2_AMP: 振れ幅
 // ENEMY2_T: 振れ周期
 // JITTER_AMP: enemy3ジッター振れ幅
-// BULLET2_POWER: 強さの係数
+// BULLET2_POWER: 強さの　係数
 function init () {
     ENEMY1_HP = 10
     ENEMY1_SPEED = 10
@@ -578,6 +673,7 @@ function pow (x: number, n: number) {
         _return = x * _return
     }
 }
+let freq = 0
 let enemy2: Sprite = null
 let enemy1: Sprite = null
 let tmp2 = 0
@@ -594,10 +690,9 @@ let _return = 0
 let BULLET2_POWER = 0
 let BULLET2_SPEED = 0
 let bullet2: Sprite = null
+let bullet2_fired = false
 let BULLET1_SPEED = 0
 let bullet1: Sprite = null
-let freq = 0
-let bullet2_fired = false
 let BULLET2_MIN = 0
 let bullet2_size = 0
 let dummy_bullet: Sprite = null
@@ -763,6 +858,7 @@ scene.setBackgroundImage(img`
 enemy2_list = []
 target = sprites.create(assets.image`myImage`, SpriteKind.Player)
 controller.moveSprite(target)
+target.z = 100
 target.setStayInScreen(true)
 tower2 = sprites.create(assets.image`myImage2`, SpriteKind.tower_kind)
 tower2.setScale(0.6, ScaleAnchor.Middle)
