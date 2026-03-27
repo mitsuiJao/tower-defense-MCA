@@ -242,8 +242,6 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, oth
         sprites.changeDataNumberBy(otherSprite, "hp", -1 * BULLET1_ATTACK)
     } else {
         sprites.changeDataNumberBy(sprite, "hp", -1 * BULLET1_ATTACK)
-        // 発射時と倒されたときに音を鳴らすように変更
-        music.play(music.melodyPlayable(music.knock), music.PlaybackMode.InBackground)
     }
     statusbars.getStatusBarAttachedTo(StatusBarKind.Health, otherSprite).value = sprites.readDataNumber(otherSprite, "hp")
     if (sprites.readDataNumber(otherSprite, "hp") <= 0) {
@@ -297,30 +295,31 @@ function list_update (array: Sprite[]) {
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     if (controller.A.isPressed()) {
         sp_attack()
+    } else {
+        dummy_bullet = sprites.create(img`
+            . . . . . b b b b b b . . . . . 
+            . . . b b 9 9 9 9 9 9 b b . . . 
+            . . b b 9 9 9 9 9 9 9 9 b b . . 
+            . b b 9 d 9 9 9 9 9 9 9 9 b b . 
+            . b 9 d 9 9 9 9 9 1 1 1 9 9 b . 
+            b 9 d d 9 9 9 9 9 1 1 1 9 9 9 b 
+            b 9 d 9 9 9 9 9 9 1 1 1 9 9 9 b 
+            b 9 3 9 9 9 9 9 9 9 9 9 1 9 9 b 
+            b 5 3 d 9 9 9 9 9 9 9 9 9 9 9 b 
+            b 5 3 3 9 9 9 9 9 9 9 9 9 d 9 b 
+            b 5 d 3 3 9 9 9 9 9 9 9 d d 9 b 
+            . b 5 3 3 3 d 9 9 9 9 d d 5 b . 
+            . b d 5 3 3 3 3 3 3 3 d 5 b b . 
+            . . b d 5 d 3 3 3 3 5 5 b b . . 
+            . . . b b 5 5 5 5 5 5 b b . . . 
+            . . . . . b b b b b b . . . . . 
+            `, SpriteKind.Player)
+        dummy_bullet.setPosition(artillery.x, artillery.y)
+        bullet2_size = BULLET2_MIN
+        dummy_bullet.setScale(bullet2_size, ScaleAnchor.Middle)
+        bullet2_fired = false
+        freq = 400
     }
-    dummy_bullet = sprites.create(img`
-        . . . . . b b b b b b . . . . . 
-        . . . b b 9 9 9 9 9 9 b b . . . 
-        . . b b 9 9 9 9 9 9 9 9 b b . . 
-        . b b 9 d 9 9 9 9 9 9 9 9 b b . 
-        . b 9 d 9 9 9 9 9 1 1 1 9 9 b . 
-        b 9 d d 9 9 9 9 9 1 1 1 9 9 9 b 
-        b 9 d 9 9 9 9 9 9 1 1 1 9 9 9 b 
-        b 9 3 9 9 9 9 9 9 9 9 9 1 9 9 b 
-        b 5 3 d 9 9 9 9 9 9 9 9 9 9 9 b 
-        b 5 3 3 9 9 9 9 9 9 9 9 9 d 9 b 
-        b 5 d 3 3 9 9 9 9 9 9 9 d d 9 b 
-        . b 5 3 3 3 d 9 9 9 9 d d 5 b . 
-        . b d 5 3 3 3 3 3 3 3 d 5 b b . 
-        . . b d 5 d 3 3 3 3 5 5 b b . . 
-        . . . b b 5 5 5 5 5 5 b b . . . 
-        . . . . . b b b b b b . . . . . 
-        `, SpriteKind.Player)
-    dummy_bullet.setPosition(artillery.x, artillery.y)
-    bullet2_size = BULLET2_MIN
-    dummy_bullet.setScale(bullet2_size, ScaleAnchor.Middle)
-    bullet2_fired = false
-    freq = 400
 })
 sprites.onOverlap(SpriteKind.Enemy, SpriteKind.tower_kind, function (sprite2, otherSprite2) {
     if (!(sprites.readDataBoolean(sprite2, "is_reach"))) {
@@ -339,29 +338,30 @@ sprites.onOverlap(SpriteKind.Enemy, SpriteKind.tower_kind, function (sprite2, ot
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (controller.B.isPressed()) {
         sp_attack()
+    } else {
+        music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.InBackground)
+        bullet_theta(target, artillery)
+        bullet1 = sprites.createProjectileFromSprite(img`
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . 2 2 2 2 . . . 
+            . . . . . . . 2 2 1 1 1 1 2 . . 
+            . . . . 2 2 3 3 1 1 1 1 1 1 . . 
+            . . 3 3 3 3 1 1 1 1 1 1 1 1 . . 
+            . . 1 1 1 1 1 1 1 1 1 1 1 1 . . 
+            . . 3 3 2 2 3 1 1 1 1 1 1 1 . . 
+            . . . . . . 2 2 3 1 1 1 1 2 . . 
+            . . . . . . . . . 2 2 2 2 . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            `, artillery, BULLET1_SPEED * Math.cos(theta), BULLET1_SPEED * Math.sin(theta))
+        bullet1.rotation = theta
+        sprites.setDataNumber(bullet1, "type", 1)
     }
-    music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.InBackground)
-    bullet_theta(target, artillery)
-    bullet1 = sprites.createProjectileFromSprite(img`
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . 2 2 2 2 . . . 
-        . . . . . . . 2 2 1 1 1 1 2 . . 
-        . . . . 2 2 3 3 1 1 1 1 1 1 . . 
-        . . 3 3 3 3 1 1 1 1 1 1 1 1 . . 
-        . . 1 1 1 1 1 1 1 1 1 1 1 1 . . 
-        . . 3 3 2 2 3 1 1 1 1 1 1 1 . . 
-        . . . . . . 2 2 3 1 1 1 1 2 . . 
-        . . . . . . . . . 2 2 2 2 . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        `, artillery, BULLET1_SPEED * Math.cos(theta), BULLET1_SPEED * Math.sin(theta))
-    bullet1.rotation = theta
-    sprites.setDataNumber(bullet1, "type", 1)
 })
 controller.B.onEvent(ControllerButtonEvent.Released, function () {
     if (!(bullet2_fired)) {
@@ -392,6 +392,11 @@ controller.B.onEvent(ControllerButtonEvent.Released, function () {
         bullet2.setScale(bullet2_size, ScaleAnchor.Middle)
         sprites.destroy(dummy_bullet)
         bullet2.sayText(sprites.readDataNumber(bullet2, "state"))
+        music.setVolume(VOLUME - 100)
+        // 発射時と倒されたときに音を鳴らすように変更
+        music.play(music.melodyPlayable(music.zapped), music.PlaybackMode.InBackground)
+        music.setVolume(VOLUME)
+        music.play(music.createSoundEffect(WaveShape.Sine, 5000, 0, 255, 0, 500, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.UntilDone)
         bullet2_fired = true
         bullet2_size = BULLET2_MIN
     }
@@ -1056,8 +1061,8 @@ game.onUpdateInterval(100, function () {
             WaveShape.Triangle,
             freq,
             freq + 100,
-            VOLUME + 100,
-            VOLUME + 100,
+            VOLUME + 500,
+            VOLUME + 500,
             110,
             SoundExpressionEffect.None,
             InterpolationCurve.Linear
