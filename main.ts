@@ -423,7 +423,7 @@ function init () {
     BULLET2_MIN = 0.4
     BULLET2_POWER = 1.8
     BULLET2_ATTACK = 10
-    TOWER_MAXHP = 500
+    TOWER_MAXHP = 5
     VOLUME = 200
 }
 function enemy3_divide (enemy3: Sprite) {
@@ -586,6 +586,12 @@ function enemy1_appear () {
     enemy_statusbar = statusbars.create(20, 2, StatusBarKind.Health)
     enemy_statusbar.max = sprites.readDataNumber(enemy1, "hp")
     enemy_statusbar.attachToSprite(enemy1)
+}
+function disable () {
+    tower_statusbar_hp = statusbars.create(50, 4, StatusBarKind.Health)
+    tower_statusbar_hp.max = tower_hp
+    tower_statusbar_hp.value = tower_hp
+    tower_statusbar_hp.attachToSprite(tower2, -10, 40)
 }
 function enemy2_appear () {
     enemy2 = sprites.create(assets.image`myImage0`, SpriteKind.Enemy)
@@ -862,6 +868,7 @@ let BULLET2_SPEED = 0
 let bullet2: Sprite = null
 let BULLET1_SPEED = 0
 let bullet1: Sprite = null
+let tower_statusbar_hp: StatusBarSprite = null
 let freq = 0
 let bullet2_fired = false
 let BULLET2_MIN = 0
@@ -898,7 +905,6 @@ let ENEMY31_HP = 0
 let enemy3: Sprite = null
 let artillery: Sprite = null
 let MAX_MP = 0
-let tower_statusbar_hp: StatusBarSprite = null
 let tower_statusbar_mp: StatusBarSprite = null
 let TOWER_MAXHP = 0
 let tower_hp = 0
@@ -918,13 +924,9 @@ tower2.setScale(0.6, ScaleAnchor.Middle)
 tower2.y = 115
 tower_hp = TOWER_MAXHP
 tower_statusbar_mp = statusbars.create(50, 4, StatusBarKind.Magic)
-tower_statusbar_hp = statusbars.create(50, 4, StatusBarKind.Health)
-tower_statusbar_hp.max = tower_hp
-tower_statusbar_hp.value = tower_hp
 tower_statusbar_mp.max = MAX_MP
 tower_statusbar_mp.value = 0
 tower2.sayText(sprites.readDataNumber(tower2, "hp"))
-tower_statusbar_hp.attachToSprite(tower2, -10, 40)
 tower_statusbar_mp.attachToSprite(tower2, -5, 40)
 artillery = sprites.create(img`
     ........................
