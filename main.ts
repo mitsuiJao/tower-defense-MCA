@@ -241,8 +241,9 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, oth
         })
         sprites.changeDataNumberBy(otherSprite, "hp", -1 * BULLET1_ATTACK)
     } else {
-        music.play(music.melodyPlayable(music.knock), music.PlaybackMode.InBackground)
         sprites.changeDataNumberBy(sprite, "hp", -1 * BULLET1_ATTACK)
+        // 発射時と倒されたときに音を鳴らすように変更
+        music.play(music.melodyPlayable(music.knock), music.PlaybackMode.InBackground)
     }
     statusbars.getStatusBarAttachedTo(StatusBarKind.Health, otherSprite).value = sprites.readDataNumber(otherSprite, "hp")
     if (sprites.readDataNumber(otherSprite, "hp") <= 0) {
@@ -823,6 +824,8 @@ function sp_attack () {
             . . . 2 2 e e 4 4 4 2 e e . . . 
             . . . . . 2 2 e e e e . . . . . 
             `, SpriteKind.Player)
+        MP = 0
+        tower_statusbar_mp.value = 0
     }
 }
 function enemy_theta (mySprite: Sprite, hp: number, x: number, y: number) {
@@ -895,8 +898,8 @@ let ENEMY31_HP = 0
 let enemy3: Sprite = null
 let artillery: Sprite = null
 let MAX_MP = 0
-let tower_statusbar_mp: StatusBarSprite = null
 let tower_statusbar_hp: StatusBarSprite = null
+let tower_statusbar_mp: StatusBarSprite = null
 let TOWER_MAXHP = 0
 let tower_hp = 0
 let tower2: Sprite = null
@@ -914,8 +917,8 @@ tower2 = sprites.create(assets.image`myImage2`, SpriteKind.tower_kind)
 tower2.setScale(0.6, ScaleAnchor.Middle)
 tower2.y = 115
 tower_hp = TOWER_MAXHP
-tower_statusbar_hp = statusbars.create(50, 4, StatusBarKind.Health)
 tower_statusbar_mp = statusbars.create(50, 4, StatusBarKind.Magic)
+tower_statusbar_hp = statusbars.create(50, 4, StatusBarKind.Health)
 tower_statusbar_hp.max = tower_hp
 tower_statusbar_hp.value = tower_hp
 tower_statusbar_mp.max = MAX_MP
