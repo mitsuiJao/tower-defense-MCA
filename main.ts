@@ -1025,6 +1025,10 @@ artillery.setScale(0.6, ScaleAnchor.Middle)
 artillery.y = 115
 game.onUpdate(function () {
     enemy3_update()
+    if (tower_hp < 0) {
+        game.setGameOverMessage(false, "GAME OVER!")
+        game.gameOver(false)
+    }
 })
 game.onUpdateInterval(2000, function () {
     list_update(enemy2_list)
