@@ -251,6 +251,42 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, oth
         sprites.destroy(otherSprite, effects.fire, 100)
     }
 })
+function fire_bullet2 () {
+    bullet2_fired = true
+    bullet_theta(target, artillery)
+    bullet2 = sprites.createProjectileFromSprite(img`
+        . . . . . b b b b b b . . . . . 
+        . . . b b 9 9 9 9 9 9 b b . . . 
+        . . b b 9 9 9 9 9 9 9 9 b b . . 
+        . b b 9 d 9 9 9 9 9 9 9 9 b b . 
+        . b 9 d 9 9 9 9 9 1 1 1 9 9 b . 
+        b 9 d d 9 9 9 9 9 1 1 1 9 9 9 b 
+        b 9 d 9 9 9 9 9 9 1 1 1 9 9 9 b 
+        b 9 3 9 9 9 9 9 9 9 9 9 1 9 9 b 
+        b 5 3 d 9 9 9 9 9 9 9 9 9 9 9 b 
+        b 5 3 3 9 9 9 9 9 9 9 9 9 d 9 b 
+        b 5 d 3 3 9 9 9 9 9 9 9 d d 9 b 
+        . b 5 3 3 3 d 9 9 9 9 d d 5 b . 
+        . b d 5 3 3 3 3 3 3 3 d 5 b b . 
+        . . b d 5 d 3 3 3 3 5 5 b b . . 
+        . . . b b 5 5 5 5 5 5 b b . . . 
+        . . . . . b b b b b b . . . . . 
+        `, artillery, BULLET2_SPEED * Math.cos(theta), BULLET2_SPEED * Math.sin(theta))
+    bullet2.rotation = theta
+    sprites.setDataNumber(bullet2, "power", bullet2_size)
+    pow(BULLET2_POWER, sprites.readDataNumber(bullet2, "power"))
+    sprites.setDataNumber(artillery, "state", Math.floor(_return))
+    sprites.setDataNumber(bullet2, "type", 2)
+    bullet2.setScale(bullet2_size, ScaleAnchor.Middle)
+    sprites.destroy(dummy_bullet)
+    bullet2.sayText(sprites.readDataNumber(bullet2, "state"))
+    music.setVolume(VOLUME - 100)
+    // 発射時と倒されたときに音を鳴らすように変更
+    music.play(music.melodyPlayable(music.zapped), music.PlaybackMode.InBackground)
+    music.setVolume(VOLUME)
+    bullet2_fired = true
+    bullet2_size = BULLET2_MIN
+}
 function bullet_theta (target: Sprite, artillery: Sprite) {
     dx = target.x - artillery.x
     dy = target.y - artillery.y
@@ -295,31 +331,30 @@ function list_update (array: Sprite[]) {
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     if (controller.A.isPressed()) {
         sp_attack()
-    } else {
-        dummy_bullet = sprites.create(img`
-            . . . . . b b b b b b . . . . . 
-            . . . b b 9 9 9 9 9 9 b b . . . 
-            . . b b 9 9 9 9 9 9 9 9 b b . . 
-            . b b 9 d 9 9 9 9 9 9 9 9 b b . 
-            . b 9 d 9 9 9 9 9 1 1 1 9 9 b . 
-            b 9 d d 9 9 9 9 9 1 1 1 9 9 9 b 
-            b 9 d 9 9 9 9 9 9 1 1 1 9 9 9 b 
-            b 9 3 9 9 9 9 9 9 9 9 9 1 9 9 b 
-            b 5 3 d 9 9 9 9 9 9 9 9 9 9 9 b 
-            b 5 3 3 9 9 9 9 9 9 9 9 9 d 9 b 
-            b 5 d 3 3 9 9 9 9 9 9 9 d d 9 b 
-            . b 5 3 3 3 d 9 9 9 9 d d 5 b . 
-            . b d 5 3 3 3 3 3 3 3 d 5 b b . 
-            . . b d 5 d 3 3 3 3 5 5 b b . . 
-            . . . b b 5 5 5 5 5 5 b b . . . 
-            . . . . . b b b b b b . . . . . 
-            `, SpriteKind.Player)
-        dummy_bullet.setPosition(artillery.x, artillery.y)
-        bullet2_size = BULLET2_MIN
-        dummy_bullet.setScale(bullet2_size, ScaleAnchor.Middle)
-        bullet2_fired = false
-        freq = 400
     }
+    dummy_bullet = sprites.create(img`
+        . . . . . b b b b b b . . . . . 
+        . . . b b 9 9 9 9 9 9 b b . . . 
+        . . b b 9 9 9 9 9 9 9 9 b b . . 
+        . b b 9 d 9 9 9 9 9 9 9 9 b b . 
+        . b 9 d 9 9 9 9 9 1 1 1 9 9 b . 
+        b 9 d d 9 9 9 9 9 1 1 1 9 9 9 b 
+        b 9 d 9 9 9 9 9 9 1 1 1 9 9 9 b 
+        b 9 3 9 9 9 9 9 9 9 9 9 1 9 9 b 
+        b 5 3 d 9 9 9 9 9 9 9 9 9 9 9 b 
+        b 5 3 3 9 9 9 9 9 9 9 9 9 d 9 b 
+        b 5 d 3 3 9 9 9 9 9 9 9 d d 9 b 
+        . b 5 3 3 3 d 9 9 9 9 d d 5 b . 
+        . b d 5 3 3 3 3 3 3 3 d 5 b b . 
+        . . b d 5 d 3 3 3 3 5 5 b b . . 
+        . . . b b 5 5 5 5 5 5 b b . . . 
+        . . . . . b b b b b b . . . . . 
+        `, SpriteKind.Player)
+    dummy_bullet.setPosition(artillery.x, artillery.y)
+    bullet2_fired = false
+    bullet2_size = BULLET2_MIN
+    dummy_bullet.setScale(bullet2_size, ScaleAnchor.Middle)
+    freq = 400
 })
 sprites.onOverlap(SpriteKind.Enemy, SpriteKind.tower_kind, function (sprite2, otherSprite2) {
     if (!(sprites.readDataBoolean(sprite2, "is_reach"))) {
@@ -338,67 +373,33 @@ sprites.onOverlap(SpriteKind.Enemy, SpriteKind.tower_kind, function (sprite2, ot
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (controller.B.isPressed()) {
         sp_attack()
-    } else {
-        music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.InBackground)
-        bullet_theta(target, artillery)
-        bullet1 = sprites.createProjectileFromSprite(img`
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . 2 2 2 2 . . . 
-            . . . . . . . 2 2 1 1 1 1 2 . . 
-            . . . . 2 2 3 3 1 1 1 1 1 1 . . 
-            . . 3 3 3 3 1 1 1 1 1 1 1 1 . . 
-            . . 1 1 1 1 1 1 1 1 1 1 1 1 . . 
-            . . 3 3 2 2 3 1 1 1 1 1 1 1 . . 
-            . . . . . . 2 2 3 1 1 1 1 2 . . 
-            . . . . . . . . . 2 2 2 2 . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            `, artillery, BULLET1_SPEED * Math.cos(theta), BULLET1_SPEED * Math.sin(theta))
-        bullet1.rotation = theta
-        sprites.setDataNumber(bullet1, "type", 1)
     }
+    music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.InBackground)
+    bullet_theta(target, artillery)
+    bullet1 = sprites.createProjectileFromSprite(img`
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . 2 2 2 2 . . . 
+        . . . . . . . 2 2 1 1 1 1 2 . . 
+        . . . . 2 2 3 3 1 1 1 1 1 1 . . 
+        . . 3 3 3 3 1 1 1 1 1 1 1 1 . . 
+        . . 1 1 1 1 1 1 1 1 1 1 1 1 . . 
+        . . 3 3 2 2 3 1 1 1 1 1 1 1 . . 
+        . . . . . . 2 2 3 1 1 1 1 2 . . 
+        . . . . . . . . . 2 2 2 2 . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        `, artillery, BULLET1_SPEED * Math.cos(theta), BULLET1_SPEED * Math.sin(theta))
+    bullet1.rotation = theta
+    sprites.setDataNumber(bullet1, "type", 1)
 })
 controller.B.onEvent(ControllerButtonEvent.Released, function () {
     if (!(bullet2_fired)) {
-        bullet_theta(target, artillery)
-        bullet2 = sprites.createProjectileFromSprite(img`
-            . . . . . b b b b b b . . . . . 
-            . . . b b 9 9 9 9 9 9 b b . . . 
-            . . b b 9 9 9 9 9 9 9 9 b b . . 
-            . b b 9 d 9 9 9 9 9 9 9 9 b b . 
-            . b 9 d 9 9 9 9 9 1 1 1 9 9 b . 
-            b 9 d d 9 9 9 9 9 1 1 1 9 9 9 b 
-            b 9 d 9 9 9 9 9 9 1 1 1 9 9 9 b 
-            b 9 3 9 9 9 9 9 9 9 9 9 1 9 9 b 
-            b 5 3 d 9 9 9 9 9 9 9 9 9 9 9 b 
-            b 5 3 3 9 9 9 9 9 9 9 9 9 d 9 b 
-            b 5 d 3 3 9 9 9 9 9 9 9 d d 9 b 
-            . b 5 3 3 3 d 9 9 9 9 d d 5 b . 
-            . b d 5 3 3 3 3 3 3 3 d 5 b b . 
-            . . b d 5 d 3 3 3 3 5 5 b b . . 
-            . . . b b 5 5 5 5 5 5 b b . . . 
-            . . . . . b b b b b b . . . . . 
-            `, artillery, BULLET2_SPEED * Math.cos(theta), BULLET2_SPEED * Math.sin(theta))
-        bullet2.rotation = theta
-        sprites.setDataNumber(bullet2, "power", bullet2_size)
-        pow(BULLET2_POWER, sprites.readDataNumber(bullet2, "power"))
-        sprites.setDataNumber(artillery, "state", Math.floor(_return))
-        sprites.setDataNumber(bullet2, "type", 2)
-        bullet2.setScale(bullet2_size, ScaleAnchor.Middle)
-        sprites.destroy(dummy_bullet)
-        bullet2.sayText(sprites.readDataNumber(bullet2, "state"))
-        music.setVolume(VOLUME - 100)
-        // 発射時と倒されたときに音を鳴らすように変更
-        music.play(music.melodyPlayable(music.zapped), music.PlaybackMode.InBackground)
-        music.setVolume(VOLUME)
-        music.play(music.createSoundEffect(WaveShape.Sine, 5000, 0, 255, 0, 500, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.UntilDone)
-        bullet2_fired = true
-        bullet2_size = BULLET2_MIN
+        fire_bullet2()
     }
 })
 // ENEMY2_AMP: 振れ幅
@@ -867,18 +868,10 @@ let ENEMY2_HP = 0
 let ENEMY1_POINT = 0
 let ENEMY1_SPEED = 0
 let ENEMY1_HP = 0
-let _return = 0
-let BULLET2_POWER = 0
-let BULLET2_SPEED = 0
-let bullet2: Sprite = null
 let BULLET1_SPEED = 0
 let bullet1: Sprite = null
 let tower_statusbar_hp: StatusBarSprite = null
 let freq = 0
-let bullet2_fired = false
-let BULLET2_MIN = 0
-let bullet2_size = 0
-let dummy_bullet: Sprite = null
 let output_list: Sprite[] = []
 let abs_dx = 0
 let currentDY = 0
@@ -896,6 +889,14 @@ let lastY = 0
 let lastX = 0
 let dy = 0
 let dx = 0
+let BULLET2_MIN = 0
+let dummy_bullet: Sprite = null
+let _return = 0
+let BULLET2_POWER = 0
+let bullet2_size = 0
+let BULLET2_SPEED = 0
+let bullet2: Sprite = null
+let bullet2_fired = false
 let MP = 0
 let BULLET1_ATTACK = 0
 let enemy_statusbar: StatusBarSprite = null
@@ -1070,34 +1071,6 @@ game.onUpdateInterval(100, function () {
             freq += 100
         }
     } else {
-        bullet_theta(target, artillery)
-        bullet2 = sprites.createProjectileFromSprite(img`
-            . . . . . b b b b b b . . . . . 
-            . . . b b 9 9 9 9 9 9 b b . . . 
-            . . b b 9 9 9 9 9 9 9 9 b b . . 
-            . b b 9 d 9 9 9 9 9 9 9 9 b b . 
-            . b 9 d 9 9 9 9 9 1 1 1 9 9 b . 
-            b 9 d d 9 9 9 9 9 1 1 1 9 9 9 b 
-            b 9 d 9 9 9 9 9 9 1 1 1 9 9 9 b 
-            b 9 3 9 9 9 9 9 9 9 9 9 1 9 9 b 
-            b 5 3 d 9 9 9 9 9 9 9 9 9 9 9 b 
-            b 5 3 3 9 9 9 9 9 9 9 9 9 d 9 b 
-            b 5 d 3 3 9 9 9 9 9 9 9 d d 9 b 
-            . b 5 3 3 3 d 9 9 9 9 d d 5 b . 
-            . b d 5 3 3 3 3 3 3 3 d 5 b b . 
-            . . b d 5 d 3 3 3 3 5 5 b b . . 
-            . . . b b 5 5 5 5 5 5 b b . . . 
-            . . . . . b b b b b b . . . . . 
-            `, artillery, BULLET2_SPEED * Math.cos(theta), BULLET2_SPEED * Math.sin(theta))
-        bullet2.rotation = theta
-        sprites.setDataNumber(bullet2, "power", bullet2_size)
-        pow(BULLET2_POWER, sprites.readDataNumber(bullet2, "power"))
-        sprites.setDataNumber(bullet2, "state", Math.floor(_return))
-        sprites.setDataNumber(bullet2, "type", 2)
-        bullet2.setScale(bullet2_size, ScaleAnchor.Middle)
-        sprites.destroy(dummy_bullet)
-        bullet2.sayText(sprites.readDataNumber(bullet2, "state"))
-        bullet2_fired = true
-        bullet2_size = BULLET2_MIN
+        fire_bullet2()
     }
 })
