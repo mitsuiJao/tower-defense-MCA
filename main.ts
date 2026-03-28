@@ -133,6 +133,7 @@ function enemy3_appear (state: number, x: number, y: number) {
     sprites.setDataNumber(enemy3, "point", ENEMY3_POINT)
     sprites.setDataBoolean(enemy3, "is_reach", false)
     sprites.setDataBoolean(enemy3, "is_exist", true)
+    sprites.setDataBoolean(enemy3, "is_invincibility", false)
     sprites.setDataBoolean(enemy3, "is_divide", false)
     enemy3_list.push(enemy3)
     enemy3.setVelocity(ENEMY31_SPEED * Math.cos(theta), ENEMY31_SPEED * Math.sin(theta))
@@ -240,8 +241,17 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, oth
             sprites.destroy(sprite)
         })
         sprites.changeDataNumberBy(otherSprite, "hp", -1 * BULLET1_ATTACK)
+    } else if (sprites.readDataNumber(sprite, "type") == 2) {
+        if (!(sprites.readDataBoolean(otherSprite, "is_invincibility"))) {
+            sprites.changeDataNumberBy(otherSprite, "hp", -1 * BULLET1_ATTACK)
+            sprites.setDataBoolean(otherSprite, "is_invincibility", true)
+            music.play(music.melodyPlayable(music.knock), music.PlaybackMode.InBackground)
+            timer.after(1000, function () {
+                sprites.setDataBoolean(otherSprite, "is_invincibility", false)
+            })
+        }
     } else {
-        sprites.changeDataNumberBy(sprite, "hp", -1 * BULLET1_ATTACK)
+    	
     }
     statusbars.getStatusBarAttachedTo(StatusBarKind.Health, otherSprite).value = sprites.readDataNumber(otherSprite, "hp")
     if (sprites.readDataNumber(otherSprite, "hp") <= 0) {
@@ -280,6 +290,19 @@ function fire_bullet2 () {
     bullet2.setScale(bullet2_size, ScaleAnchor.Middle)
     sprites.destroy(dummy_bullet)
     bullet2.sayText(sprites.readDataNumber(bullet2, "state"))
+    bullet2.sayText(bullet2_size)
+    if (bullet2_size < 1) {
+        sprites.setDataNumber(bullet2, "power_level", 0)
+        sprites.setDataNumber(bullet2, "hit_count", 1)
+    } else if (1 <= bullet2_size && bullet2_size < 1.8) {
+        sprites.setDataNumber(bullet2, "power_level", 1)
+        sprites.setDataNumber(bullet2, "hit_count", 3)
+    } else if (bullet2_size <= 1.8 && bullet2_size <= 2) {
+        sprites.setDataNumber(bullet2, "power_level", 2)
+        sprites.setDataNumber(bullet2, "hit_count", -1)
+    } else {
+    	
+    }
     music.setVolume(VOLUME - 100)
     // 発射時と倒されたときに音を鳴らすように変更
     music.play(music.melodyPlayable(music.zapped), music.PlaybackMode.InBackground)
@@ -588,6 +611,7 @@ function enemy1_appear () {
     sprites.setDataNumber(enemy1, "point", ENEMY1_POINT)
     sprites.setDataBoolean(enemy1, "is_reach", false)
     sprites.setDataBoolean(enemy1, "is_exist", true)
+    sprites.setDataBoolean(enemy1, "is_invincibility", false)
     enemy1.setVelocity(ENEMY1_SPEED * Math.cos(theta), ENEMY1_SPEED * Math.sin(theta))
     enemy_statusbar = statusbars.create(20, 2, StatusBarKind.Health)
     enemy_statusbar.max = sprites.readDataNumber(enemy1, "hp")
@@ -686,6 +710,8 @@ function enemy2_appear () {
     sprites.setDataNumber(enemy2, "point", ENEMY2_POINT)
     sprites.setDataBoolean(enemy2, "is_reach", false)
     sprites.setDataBoolean(enemy2, "is_exist", true)
+    sprites.setDataBoolean(enemy2, "is_invincibility", false)
+    sprites.setDataBoolean(enemy2, "is_", true)
     enemy2_list.push(enemy2)
     enemy2.setVelocity(ENEMY2_SPEED * Math.cos(theta), ENEMY2_SPEED * Math.sin(theta))
     enemy_statusbar = statusbars.create(20, 2, StatusBarKind.Health)
@@ -1056,19 +1082,19 @@ game.onUpdateInterval(100, function () {
         if (controller.B.isPressed() && !(bullet2_fired)) {
             bullet_theta(target, artillery)
             dummy_bullet.rotation = theta
-            bullet2_size += 0.1
+            bullet2_size += 0.05
             dummy_bullet.setScale(bullet2_size, ScaleAnchor.Middle)
             music.play(music.createSoundEffect(
-            WaveShape.Triangle,
+            WaveShape.Square,
             freq,
-            freq + 100,
-            VOLUME + 500,
-            VOLUME + 500,
-            110,
-            SoundExpressionEffect.None,
+            freq + 50,
+            VOLUME + 400,
+            VOLUME + 400,
+            100,
+            SoundExpressionEffect.Tremolo,
             InterpolationCurve.Linear
             ), music.PlaybackMode.InBackground)
-            freq += 100
+            freq += 50
         }
     } else {
         fire_bullet2()
