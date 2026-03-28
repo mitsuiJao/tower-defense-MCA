@@ -413,13 +413,16 @@ function fire_bullet2 () {
     bullet2.setScale(bullet2_size, ScaleAnchor.Middle)
     sprites.destroy(dummy_bullet)
     bullet2.sayText(sprites.readDataNumber(bullet2, "state"))
-    if (bullet2_size < 1) {
+    if (bullet2_size < 0.6) {
         sprites.setDataNumber(bullet2, "power", 10)
         sprites.setDataNumber(bullet2, "hit_count", 1)
-    } else if (1 <= bullet2_size && bullet2_size < 1.8) {
+    } else if (0.6 <= bullet2_size && bullet2_size < 1) {
         sprites.setDataNumber(bullet2, "power", 25)
         sprites.setDataNumber(bullet2, "hit_count", 5)
-    } else if (1.8 <= bullet2_size) {
+    } else if (1 <= bullet2_size && bullet2_size < 1.9) {
+        sprites.setDataNumber(bullet2, "power", 30)
+        sprites.setDataNumber(bullet2, "hit_count", 10)
+    } else if (1.9 <= bullet2_size) {
         sprites.setDataNumber(bullet2, "power", 60)
         sprites.setDataNumber(bullet2, "hit_count", 99999)
     } else {
@@ -625,7 +628,7 @@ function gamestart () {
         `)
     enemy2_list = []
     target = sprites.create(assets.image`myImage`, SpriteKind.Player)
-    controller.moveSprite(target)
+    controller.moveSprite(target, 120, 120)
     target.z = 100
     target.setStayInScreen(true)
     tower2 = sprites.create(assets.image`myImage2`, SpriteKind.tower_kind)
@@ -741,6 +744,8 @@ function gamestart () {
     hearts = []
     hearts_update(tower_hp)
     mp_notify = false
+    first1 = true
+    first2 = true
 }
 sprites.onOverlap(SpriteKind.Enemy, SpriteKind.tower_kind, function (sprite2, otherSprite2) {
     if (!(sprites.readDataBoolean(sprite2, "is_reach"))) {
@@ -752,6 +757,7 @@ sprites.onOverlap(SpriteKind.Enemy, SpriteKind.tower_kind, function (sprite2, ot
                     break;
                 }
                 music.play(music.melodyPlayable(music.buzzer), music.PlaybackMode.InBackground)
+                scene.cameraShake(5, 500)
                 tower_hp += -1
                 hearts_update(tower_hp)
                 otherSprite2.sayText(sprites.readDataNumber(otherSprite2, "hp"), 500, false)
@@ -1084,21 +1090,21 @@ function init_difficulty () {
 }
 function init_interval () {
     ENEMY1_MIN_ITV_ARR = [
-    10000,
-    8000,
-    6000,
-    4000
+    9000,
+    7000,
+    5000,
+    3000
     ]
     ENEMY1_MAX_ITV_ARR = [
-    20000,
+    15000,
     18000,
-    16000,
-    10000
+    10000,
+    7000
     ]
     ENEMY2_MIN_ITV_ARR = [
     10000,
     8000,
-    6000,
+    5000,
     4000
     ]
     ENEMY2_MAX_ITV_ARR = [
@@ -1110,7 +1116,7 @@ function init_interval () {
     ENEMY3_MIN_ITV_ARR = [
     10000,
     8000,
-    6000,
+    5000,
     4000
     ]
     ENEMY3_MAX_ITV_ARR = [
@@ -1135,14 +1141,14 @@ function enemy3_update () {
         if (!(sprites.readDataBoolean(k, "is_jitter")) && dist < 70 && sprites.readDataNumber(k, "state") == 1) {
             sprites.setDataBoolean(k, "is_jitter", true)
             k.setVelocity(0, 0)
-            tmp1 = k.x
-            tmp2 = k.y
+            sprites.setDataNumber(k, "homeX", k.x)
+            sprites.setDataNumber(k, "homeY", k.y)
             timer.after(2000, function () {
                 enemy3_divide(k)
             })
         }
         if (sprites.readDataBoolean(k, "is_jitter")) {
-            k.setPosition(tmp1 + randint(-1 * JITTER_AMP, JITTER_AMP), tmp2 + randint(-1 * JITTER_AMP, JITTER_AMP))
+            k.setPosition(sprites.readDataNumber(k, "homeX") + randint(-1 * JITTER_AMP, JITTER_AMP), sprites.readDataNumber(k, "homeY") + randint(-1 * JITTER_AMP, JITTER_AMP))
         }
     }
 }
@@ -1585,6 +1591,7 @@ function start () {
             miniMenu.onButtonPressed(difficulty_menu, miniMenu.Button.A, function (selection, selectedIndex) {
                 miniMenu.close(difficulty_menu)
                 difficulty = selectedIndex
+                difficulty_jp = selection
                 gamestart()
             })
             miniMenu.onButtonPressed(difficulty_menu, miniMenu.Button.B, function (selection, selectedIndex) {
@@ -1740,28 +1747,28 @@ function init_const () {
     ]
     ENEMY1_POINT = 10
     ENEMY2_HP_ARR = [
-    30,
-    40,
-    60,
-    80
+    10,
+    15,
+    20,
+    40
     ]
     ENEMY2_SPEED_ARR = [
     10,
     15,
     20,
-    30
+    20
     ]
     ENEMY2_AMP_ARR = [
     20,
-    25,
+    20,
     30,
     40
     ]
     ENEMY2_T_ARR = [
     40,
-    40,
-    40,
-    40
+    45,
+    70,
+    80
     ]
     ENEMY2_POINT = 20
     ENEMY31_HP_ARR = [
@@ -1771,13 +1778,13 @@ function init_const () {
     70
     ]
     ENEMY32_HP_ARR = [
-    5,
     10,
-    20,
-    40
+    15,
+    30,
+    45
     ]
     ENEMY31_SPEED = 10
-    ENEMY32_SPEED = 20
+    ENEMY32_SPEED = 13
     ENEMY3_POINT = 20
     JITTER_AMP = 1
     HEAL_MAX_MOVE_ARR = [
@@ -1802,9 +1809,15 @@ function init_const () {
     50,
     60,
     70,
-    200
+    100
     ]
     VOLUME = 200
+    difficulty_jp_arr = [
+    "GAME OVER! kantan",
+    "GAME OVER! hutsuu",
+    "GAME OVER! muzukashii",
+    "GAME OVER! oni"
+    ]
 }
 function sp_attack () {
     if (!(is_bomb)) {
@@ -1981,7 +1994,9 @@ let interval = 0
 let max_size = 0
 let steps = 0
 let is_bomb = false
+let difficulty_jp_arr: string[] = []
 let BOMB_AIRTIME = 0
+let difficulty_jp = ""
 let difficulty_menu: Sprite = null
 let start_menu: Sprite = null
 let ENEMY2_POINT = 0
@@ -1990,7 +2005,6 @@ let tower_statusbar_hp: StatusBarSprite = null
 let ENEMY1_POINT = 0
 let enemy1: Sprite = null
 let JITTER_AMP = 0
-let tmp2 = 0
 let HEAL_MAX_ITV = 0
 let HEAL_MIN_ITV_ARR: number[] = []
 let HEAL_MIN_ITV = 0
@@ -2030,6 +2044,8 @@ let bullet1: Sprite = null
 let HEALCHAR_SPEED = 0
 let tmp1 = 0
 let HEAL_MAX_MOVE = 0
+let first2 = false
+let first1 = false
 let tower2: Sprite = null
 let freq = 0
 let game_state = 0
@@ -2086,7 +2102,7 @@ game.onUpdate(function () {
         }
         if (tower_hp < 0) {
             game_state = -1
-            game.setGameOverMessage(false, "GAME OVER!")
+            game.setGameOverMessage(false, difficulty_jp_arr[difficulty])
             game.gameOver(false)
         }
     }
@@ -2100,37 +2116,38 @@ game.onUpdateInterval(2000, function () {
     }
 })
 forever(function () {
-    pause(randint(HEAL_MIN_ITV, HEAL_MAX_ITV))
     if (game_state == 1) {
-        healchar_appear()
         pause(randint(HEAL_MIN_ITV, HEAL_MAX_ITV))
+        healchar_appear()
     }
 })
 forever(function () {
-    pause(randint(ENEMY2_MIN_ITV, ENEMY2_MAX_ITV))
     if (game_state == 1) {
+        if (first1) {
+            first1 = false
+            pause(2000)
+        }
         enemy2_appear(randint(10, 150), 0)
         pause(randint(ENEMY2_MIN_ITV, ENEMY2_MAX_ITV))
+    }
+})
+forever(function () {
+	
+})
+forever(function () {
+    if (game_state == 1) {
+        if (first2) {
+            first2 = false
+            pause(1000)
+        }
+        enemy3_appear(1, randint(10, 150), 1)
+        pause(randint(ENEMY3_MIN_ITV, ENEMY3_MAX_ITV))
     }
 })
 forever(function () {
     if (game_state == 1) {
         enemy1_appear(randint(10, 150), 1)
         pause(randint(ENEMY1_MIN_ITV, ENEMY1_MAX_ITV))
-    }
-})
-forever(function () {
-    pause(randint(ENEMY3_MIN_ITV, ENEMY3_MAX_ITV))
-    if (game_state == 1) {
-        enemy3_appear(1, randint(10, 150), 1)
-        pause(randint(ENEMY3_MIN_ITV, ENEMY3_MAX_ITV))
-    }
-})
-forever(function () {
-    pause(randint(ENEMY2_MIN_ITV, ENEMY2_MAX_ITV))
-    if (game_state == 1) {
-        enemy2_appear(randint(10, 150), 0)
-        pause(randint(ENEMY2_MIN_ITV, ENEMY2_MAX_ITV))
     }
 })
 game.onUpdateInterval(100, function () {
