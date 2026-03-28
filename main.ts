@@ -248,7 +248,11 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, oth
         sprites.changeDataNumberBy(otherSprite, "hp", -1 * BULLET1_ATTACK)
     } else if (sprites.readDataNumber(sprite, "type") == 2) {
         if (!(sprites.readDataBoolean(otherSprite, "is_invincibility"))) {
-            sprites.changeDataNumberBy(otherSprite, "hp", -1 * BULLET1_ATTACK)
+            sprites.changeDataNumberBy(otherSprite, "hp", -1 * sprites.readDataNumber(sprite, "power"))
+            sprites.changeDataNumberBy(sprite, "hit_count", -1)
+            if (sprites.readDataNumber(sprite, "hit_count") < 0) {
+                sprites.destroy(sprite)
+            }
             sprites.setDataBoolean(otherSprite, "is_invincibility", true)
             music.play(music.melodyPlayable(music.knock), music.PlaybackMode.InBackground)
             timer.after(1000, function () {
@@ -292,26 +296,12 @@ function hearts_update (hp: number) {
 function fire_bullet2 () {
     bullet2_fired = true
     bullet_theta(target, artillery)
-    bullet2 = sprites.createProjectileFromSprite(img`
-        . . . . . b b b b b b . . . . . 
-        . . . b b 9 9 9 9 9 9 b b . . . 
-        . . b b 9 9 9 9 9 9 9 9 b b . . 
-        . b b 9 d 9 9 9 9 9 9 9 9 b b . 
-        . b 9 d 9 9 9 9 9 1 1 1 9 9 b . 
-        b 9 d d 9 9 9 9 9 1 1 1 9 9 9 b 
-        b 9 d 9 9 9 9 9 9 1 1 1 9 9 9 b 
-        b 9 3 9 9 9 9 9 9 9 9 9 1 9 9 b 
-        b 5 3 d 9 9 9 9 9 9 9 9 9 9 9 b 
-        b 5 3 3 9 9 9 9 9 9 9 9 9 d 9 b 
-        b 5 d 3 3 9 9 9 9 9 9 9 d d 9 b 
-        . b 5 3 3 3 d 9 9 9 9 d d 5 b . 
-        . b d 5 3 3 3 3 3 3 3 d 5 b b . 
-        . . b d 5 d 3 3 3 3 5 5 b b . . 
-        . . . b b 5 5 5 5 5 5 b b . . . 
-        . . . . . b b b b b b . . . . . 
-        `, artillery, BULLET2_SPEED * Math.cos(theta), BULLET2_SPEED * Math.sin(theta))
+    if (bullet2_size == 1000000) {
+        bullet2 = sprites.createProjectileFromSprite(assets.image`bullet2_max`, artillery, BULLET2_SPEED * Math.cos(theta), BULLET2_SPEED * Math.sin(theta))
+    } else {
+        bullet2 = sprites.createProjectileFromSprite(assets.image`bullet2`, artillery, BULLET2_SPEED * Math.cos(theta), BULLET2_SPEED * Math.sin(theta))
+    }
     bullet2.rotation = theta
-    sprites.setDataNumber(bullet2, "power", bullet2_size)
     pow(BULLET2_POWER, sprites.readDataNumber(bullet2, "power"))
     sprites.setDataNumber(artillery, "state", Math.floor(_return))
     sprites.setDataNumber(bullet2, "type", 2)
@@ -320,14 +310,14 @@ function fire_bullet2 () {
     bullet2.sayText(sprites.readDataNumber(bullet2, "state"))
     bullet2.sayText(bullet2_size)
     if (bullet2_size < 1) {
-        sprites.setDataNumber(bullet2, "power_level", 0)
+        sprites.setDataNumber(bullet2, "power", 10)
         sprites.setDataNumber(bullet2, "hit_count", 1)
     } else if (1 <= bullet2_size && bullet2_size < 1.8) {
-        sprites.setDataNumber(bullet2, "power_level", 1)
-        sprites.setDataNumber(bullet2, "hit_count", 3)
-    } else if (bullet2_size <= 1.8 && bullet2_size <= 2) {
-        sprites.setDataNumber(bullet2, "power_level", 2)
-        sprites.setDataNumber(bullet2, "hit_count", -1)
+        sprites.setDataNumber(bullet2, "power", 25)
+        sprites.setDataNumber(bullet2, "hit_count", 5)
+    } else if (1.8 <= bullet2_size) {
+        sprites.setDataNumber(bullet2, "power", 60)
+        sprites.setDataNumber(bullet2, "hit_count", 99999)
     } else {
     	
     }
@@ -1452,9 +1442,9 @@ let VOLUME = 0
 let dummy_bullet: Sprite = null
 let _return = 0
 let BULLET2_POWER = 0
-let bullet2_size = 0
 let BULLET2_SPEED = 0
 let bullet2: Sprite = null
+let bullet2_size = 0
 let artillery: Sprite = null
 let target: Sprite = null
 let bullet2_fired = false
