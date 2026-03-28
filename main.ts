@@ -3,7 +3,11 @@ namespace SpriteKind {
     export const tower_kind = SpriteKind.create()
     export const damy_projectile = SpriteKind.create()
     export const UI = SpriteKind.create()
+    export const bomb = SpriteKind.create()
 }
+/**
+ * ダメージを各bulletが持つpowerで減算するように変更
+ */
 function enemy3_appear (state: number, x: number, y: number) {
     enemy3 = sprites.create(assets.image`myImage0`, SpriteKind.Enemy)
     animation.runImageAnimation(
@@ -251,6 +255,8 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, oth
                 sprites.setDataBoolean(otherSprite, "is_invincibility", false)
             })
         }
+    } else if (sprites.readDataNumber(sprite, "type") == 3) {
+        sprites.changeDataNumberBy(otherSprite, "hp", -1 * sprites.readDataNumber(sprite, "power"))
     } else {
     	
     }
@@ -606,6 +612,7 @@ function init () {
     BULLET2_MIN = 0.4
     BULLET2_POWER = 1.8
     BULLET2_ATTACK = 10
+    BOMB_AIRTIME = 2
     TOWER_MAXHP = 5
     VOLUME = 200
 }
@@ -1222,27 +1229,158 @@ function start () {
     })
 }
 function sp_attack () {
-    if (MP >= MAX_MP) {
-        bomb = sprites.create(img`
-            . . . . . . . e c 7 . . . . . . 
-            . . . . e e e c 7 7 e e . . . . 
-            . . c e e e e c 7 e 2 2 e e . . 
-            . c e e e e e c 6 e e 2 2 2 e . 
-            . c e e e 2 e c c 2 4 5 4 2 e . 
-            c e e e 2 2 2 2 2 2 4 5 5 2 2 e 
-            c e e 2 2 2 2 2 2 2 2 4 4 2 2 e 
-            c e e 2 2 2 2 2 2 2 2 2 2 2 2 e 
-            c e e 2 2 2 2 2 2 2 2 2 2 2 2 e 
-            c e e 2 2 2 2 2 2 2 2 2 2 2 2 e 
-            c e e 2 2 2 2 2 2 2 2 2 2 4 2 e 
-            . e e e 2 2 2 2 2 2 2 2 2 4 e . 
-            . 2 e e 2 2 2 2 2 2 2 2 4 2 e . 
-            . . 2 e e 2 2 2 2 2 4 4 2 e . . 
-            . . . 2 2 e e 4 4 4 2 e e . . . 
-            . . . . . 2 2 e e e e . . . . . 
-            `, SpriteKind.Player)
-        MP = 0
-        tower_statusbar_mp.value = 0
+    MP = MAX_MP
+    if (!(is_bomb)) {
+        steps = 10
+        max_size = 2.5
+        interval = BOMB_AIRTIME * 1000 / (steps * 2)
+        diff = (max_size - 1) / steps
+        if (MP >= MAX_MP) {
+            music.play(music.createSoundEffect(
+            WaveShape.Square,
+            5000,
+            2384,
+            VOLUME,
+            VOLUME * 0.5,
+            BOMB_AIRTIME * 1000,
+            SoundExpressionEffect.None,
+            InterpolationCurve.Linear
+            ), music.PlaybackMode.InBackground)
+            bomb = sprites.create(img`
+                . . . . . . . e c 7 . . . . . . 
+                . . . . e e e c 7 7 e e . . . . 
+                . . c e e e e c 7 e 2 2 e e . . 
+                . c e e e e e c 6 e e 2 2 2 e . 
+                . c e e e 2 e c c 2 4 5 4 2 e . 
+                c e e e 2 2 2 2 2 2 4 5 5 2 2 e 
+                c e e 2 2 2 2 2 2 2 2 4 4 2 2 e 
+                c e e 2 2 2 2 2 2 2 2 2 2 2 2 e 
+                c e e 2 2 2 2 2 2 2 2 2 2 2 2 e 
+                c e e 2 2 2 2 2 2 2 2 2 2 2 2 e 
+                c e e 2 2 2 2 2 2 2 2 2 2 4 2 e 
+                . e e e 2 2 2 2 2 2 2 2 2 4 e . 
+                . 2 e e 2 2 2 2 2 2 2 2 4 2 e . 
+                . . 2 e e 2 2 2 2 2 4 4 2 e . . 
+                . . . 2 2 e e 4 4 4 2 e e . . . 
+                . . . . . 2 2 e e e e . . . . . 
+                `, SpriteKind.bomb)
+            sprites.setDataNumber(bomb, "type", 3)
+            sprites.setDataNumber(bomb, "power", 9999)
+            MP = 0
+            is_bomb = true
+            tower_statusbar_mp.value = 0
+            bomb.scale = 0.5
+            bomb.setPosition(artillery.x, artillery.y)
+            bomb.setVelocity((target.x - artillery.x) / BOMB_AIRTIME, (target.y - artillery.y) / BOMB_AIRTIME)
+            timer.background(function () {
+                for (let カウンター = 0; カウンター <= steps - 1; カウンター++) {
+                    if (bomb) {
+                        bomb.scale += diff
+                        pause(interval)
+                    }
+                }
+                for (let カウンター = 0; カウンター <= steps - 1; カウンター++) {
+                    if (bomb) {
+                        bomb.scale += diff * -1
+                        pause(interval)
+                    }
+                }
+                if (bomb) {
+                    bomb.setKind(SpriteKind.Projectile)
+                    music.play(music.createSoundEffect(
+                    WaveShape.Noise,
+                    935,
+                    847,
+                    VOLUME,
+                    VOLUME * 0.5,
+                    500,
+                    SoundExpressionEffect.None,
+                    InterpolationCurve.Linear
+                    ), music.PlaybackMode.InBackground)
+                    scene.cameraShake(4, 500)
+                    bomb.setVelocity(0, 0)
+                    animation.runImageAnimation(
+                    bomb,
+                    [img`
+                        . . . . . . . . . . . . . . . . 
+                        . . . . . . . . . . . . . . . . 
+                        . . . . . . . . . . . . . . . . 
+                        . . . . . . . . . . . . . . . . 
+                        . . . . . . . . . . . . . . . . 
+                        . . . . . . . . . . . . . . . . 
+                        . . . . . . . 4 4 . . . . . . . 
+                        . . . . . . 4 5 5 4 . . . . . . 
+                        . . . . . . 2 5 5 2 . . . . . . 
+                        . . . . . . . 2 2 . . . . . . . 
+                        . . . . . . . . . . . . . . . . 
+                        . . . . . . . . . . . . . . . . 
+                        . . . . . . . . . . . . . . . . 
+                        . . . . . . . . . . . . . . . . 
+                        . . . . . . . . . . . . . . . . 
+                        . . . . . . . . . . . . . . . . 
+                        `,img`
+                        . . . . . . . . . . . . . . . . 
+                        . . . . . . . . . . . . . . . . 
+                        . . . . . . . . . . . . . . . . 
+                        . . . . . . . . . . . . . . . . 
+                        . . . . . . . . . . 4 . . . . . 
+                        . . . . 2 . . . . 4 4 . . . . . 
+                        . . . . 2 4 . . 4 5 4 . . . . . 
+                        . . . . . 2 4 d 5 5 4 . . . . . 
+                        . . . . . 2 5 5 5 5 4 . . . . . 
+                        . . . . . . 2 5 5 5 5 4 . . . . 
+                        . . . . . . 2 5 4 2 4 4 . . . . 
+                        . . . . . . 4 4 . . 2 4 4 . . . 
+                        . . . . . 4 4 . . . . . . . . . 
+                        . . . . . . . . . . . . . . . . 
+                        . . . . . . . . . . . . . . . . 
+                        . . . . . . . . . . . . . . . . 
+                        `,img`
+                        . 3 . . . . . . . . . . . 4 . . 
+                        . 3 3 . . . . . . . . . 4 4 . . 
+                        . 3 d 3 . . 4 4 . . 4 4 d 4 . . 
+                        . . 3 5 3 4 5 5 4 4 d d 4 4 . . 
+                        . . 3 d 5 d 1 1 d 5 5 d 4 4 . . 
+                        . . 4 5 5 1 1 1 1 5 1 1 5 4 . . 
+                        . 4 5 5 5 5 1 1 5 1 1 1 d 4 4 . 
+                        . 4 d 5 1 1 5 5 5 1 1 1 5 5 4 . 
+                        . 4 4 5 1 1 5 5 5 5 5 d 5 5 4 . 
+                        . . 4 3 d 5 5 5 d 5 5 d d d 4 . 
+                        . 4 5 5 d 5 5 5 d d d 5 5 4 . . 
+                        . 4 5 5 d 3 5 d d 3 d 5 5 4 . . 
+                        . 4 4 d d 4 d d d 4 3 d d 4 . . 
+                        . . 4 5 4 4 4 4 4 4 4 4 4 . . . 
+                        . 4 5 4 . . 4 4 4 . . . 4 4 . . 
+                        . 4 4 . . . . . . . . . . 4 4 . 
+                        `,img`
+                        . . . . . . . . . . . . . . . . 
+                        . . . . . . . . . . . . . . . . 
+                        . . . . . b b . b b b . . . . . 
+                        . . . . b 1 1 b 1 1 1 b . . . . 
+                        . . b b 3 1 1 d d 1 d d b b . . 
+                        . b 1 1 d d b b b b b 1 1 b . . 
+                        . b 1 1 1 b . . . . . b d d b . 
+                        . . 3 d d b . . . . . b d 1 1 b 
+                        . b 1 d 3 . . . . . . . b 1 1 b 
+                        . b 1 1 b . . . . . . b b 1 d b 
+                        . b 1 d b . . . . . . b d 3 d b 
+                        . b b d d b . . . . b d d d b . 
+                        . b d d d d b . b b 3 d d 3 b . 
+                        . . b d d 3 3 b d 3 3 b b b . . 
+                        . . . b b b d d d d d b . . . . 
+                        . . . . . . b b b b b . . . . . 
+                        `],
+                    150,
+                    false
+                    )
+                    bomb.scale = 5
+                    timer.after(450, function () {
+                        sprites.destroy(bomb)
+                        is_bomb = false
+                    })
+                }
+            })
+        }
     }
 }
 function enemy_theta (mySprite: Sprite, hp: number, x: number, y: number) {
@@ -1259,6 +1397,11 @@ function pow (x: number, n: number) {
     }
 }
 let bomb: Sprite = null
+let diff = 0
+let interval = 0
+let max_size = 0
+let steps = 0
+let is_bomb = false
 let difficulty_menu: Sprite = null
 let start_menu: Sprite = null
 let enemy2: Sprite = null
@@ -1268,6 +1411,7 @@ let tmp2 = 0
 let tmp1 = 0
 let spreadTheta = 0
 let child: Sprite = null
+let BOMB_AIRTIME = 0
 let BULLET2_ATTACK = 0
 let JITTER_AMP = 0
 let ENEMY32_SPEED = 0
@@ -1349,7 +1493,8 @@ game.onUpdateInterval(2000, function () {
     }
 })
 forever(function () {
-	
+    enemy1_appear()
+    pause(500)
 })
 game.onUpdateInterval(100, function () {
     if (game_state == 1) {
