@@ -250,7 +250,7 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, oth
         if (!(sprites.readDataBoolean(otherSprite, "is_invincibility"))) {
             sprites.changeDataNumberBy(otherSprite, "hp", -1 * sprites.readDataNumber(sprite, "power"))
             sprites.changeDataNumberBy(sprite, "hit_count", -1)
-            if (sprites.readDataNumber(sprite, "hit_count") < 0) {
+            if (sprites.readDataNumber(sprite, "hit_count") <= 0) {
                 sprites.destroy(sprite)
             }
             sprites.setDataBoolean(otherSprite, "is_invincibility", true)
@@ -292,6 +292,128 @@ function hearts_update (hp: number) {
         heart2.setPosition(10 + カウンター * 11, 105)
         hearts.push(heart2)
     }
+}
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Food, function (sprite, otherSprite) {
+    if (sprites.readDataNumber(sprite, "type") == 1) {
+        sprite.setVelocity(0, 0)
+        animation.runImageAnimation(
+        sprite,
+        [img`
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . 3 3 . . . . . . . 
+            . . . . . . 3 1 1 3 . . . . . . 
+            . . . . . . 3 1 1 3 . . . . . . 
+            . . 3 2 2 3 1 1 1 1 3 2 2 . . . 
+            . . 3 3 1 1 1 1 1 1 1 1 3 3 . . 
+            . . 3 3 1 1 1 1 1 1 1 1 3 3 . . 
+            . . . 3 1 1 1 1 1 1 1 1 3 . . . 
+            . . . . 3 1 1 1 1 1 1 3 . . . . 
+            . . . . 2 1 1 1 1 1 1 2 . . . . 
+            . . . . 2 1 1 3 3 1 1 2 . . . . 
+            . . . . 3 3 3 2 2 2 3 3 . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            `,img`
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . 2 2 . . . . . . . 
+            . . . . . . 3 1 1 3 . . . . . . 
+            . . . . . 2 1 1 1 1 2 . . . . . 
+            . . . . . 2 1 1 1 1 2 . . . . . 
+            . . . . . . 3 1 1 3 . . . . . . 
+            . . . . . . . 2 2 . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            `,img`
+            . . . . . . 3 3 . . . . . . . . 
+            . . . . . . 3 1 3 . . . . . . . 
+            . . 3 3 . . 3 1 3 . . 3 3 . . . 
+            . . 3 1 3 . 3 1 3 2 3 1 3 . . . 
+            . . . 3 1 3 3 1 3 2 1 3 . . . . 
+            3 3 3 3 2 1 3 1 1 1 3 . . . . . 
+            3 1 1 1 1 1 1 1 1 2 3 3 3 3 3 3 
+            . 3 3 3 2 3 1 1 1 1 1 1 1 1 1 3 
+            . . . . . 2 1 1 1 3 3 2 3 3 3 . 
+            . . . . 3 1 3 1 3 1 2 . . . . . 
+            . . . 3 1 3 2 1 3 3 1 3 . . . . 
+            . . 3 1 3 . 2 1 3 . 3 1 3 . . . 
+            . . 3 3 . . 3 1 3 . . 3 3 . . . 
+            . . . . . . 3 1 3 . . . . . . . 
+            . . . . . . 3 1 3 . . . . . . . 
+            . . . . . . 3 3 . . . . . . . . 
+            `,img`
+            . . 3 3 . . . 3 3 . . . . . . . 
+            . 3 1 1 2 . . 3 1 3 . . 3 3 3 . 
+            . 3 1 1 2 . . 3 1 3 . 3 1 1 3 . 
+            . . 3 2 2 . . 2 1 2 . 2 1 1 3 . 
+            . 3 3 . . . . . 2 2 . 2 2 2 . . 
+            3 1 1 2 2 . . . . . . . 3 3 . . 
+            3 1 1 1 2 . . . . . . 2 1 1 3 3 
+            3 1 1 2 . . . . . . 3 1 1 1 1 3 
+            . 3 2 2 . . . . . . . 2 1 1 3 . 
+            . . . . . . . 2 . . . . 3 3 . . 
+            . . 2 2 2 . 2 1 2 . . 2 2 2 . . 
+            . 3 1 1 2 2 3 1 1 2 . 2 1 1 3 3 
+            3 1 1 1 2 2 1 1 1 2 . 2 1 1 1 3 
+            3 1 1 3 . . 3 1 3 . . . 3 1 1 3 
+            3 3 3 . . . . 3 3 . . . . 3 3 . 
+            . . . . . . . . . . . . . . . . 
+            `,img`
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . . . . . . . 
+            . . . . . . . . . . 3 . . . . . 
+            . . . . . 3 . . . . 3 3 . . . . 
+            . . . . 3 3 . . . . . 3 . . . . 
+            . . . . 3 . . . 3 . . . . . . . 
+            . . . . . . . . 3 . . . . . . . 
+            . 3 . . . . . . . . . . 3 . . . 
+            3 3 . . . . . . . . . . 3 3 . . 
+            3 . . . . . . . . . . . . 3 . . 
+            . . . . . . . . . . . . . . . . 
+            . . . 3 . . . 3 . . . . . 3 . . 
+            . . 3 3 . . . 3 . . . . . 3 3 . 
+            . . 3 . . . . 3 . . . . . . 3 . 
+            `],
+        50,
+        false
+        )
+        sprite.setKind(SpriteKind.damy_projectile)
+        timer.after(250, function () {
+            sprites.destroy(sprite)
+        })
+    } else if (sprites.readDataNumber(sprite, "type") == 2) {
+        sprites.changeDataNumberBy(sprite, "hit_count", -1)
+        if (sprites.readDataNumber(sprite, "hit_count") <= 0) {
+            sprites.destroy(sprite)
+        }
+    } else if (sprites.readDataNumber(sprite, "type") == 3) {
+    	
+    } else {
+    	
+    }
+    music.play(music.melodyPlayable(music.magicWand), music.PlaybackMode.InBackground)
+    tower_hp = Math.constrain(tower_hp + 1, 0, TOWER_MAXHP)
+    hearts_update(tower_hp)
+    sprites.destroy(otherSprite, effects.fire, 100)
+})
+function healchar_appear () {
+    is_healchar = true
+    is_left = true
+    healchar = sprites.create(assets.image`myImage0`, SpriteKind.Food)
+    healchar.setPosition(79, -50)
+    sprites.setDataNumber(healchar, "x", randint(10, 140))
+    sprites.setDataNumber(healchar, "y", randint(10, 50))
+    sprites.setDataNumber(healchar, "move_count", 0)
 }
 function fire_bullet2 () {
     bullet2_fired = true
@@ -518,7 +640,7 @@ function gamestart () {
     artillery.setScale(0.6, ScaleAnchor.Middle)
     artillery.y = 115
     hearts = []
-    hearts_update(TOWER_MAXHP)
+    hearts_update(tower_hp)
 }
 sprites.onOverlap(SpriteKind.Enemy, SpriteKind.tower_kind, function (sprite2, otherSprite2) {
     if (!(sprites.readDataBoolean(sprite2, "is_reach"))) {
@@ -538,6 +660,253 @@ sprites.onOverlap(SpriteKind.Enemy, SpriteKind.tower_kind, function (sprite2, ot
         })
     }
 })
+function healchar_update () {
+    if (HEAL_MAX_MOVE <= sprites.readDataNumber(healchar, "move_count")) {
+        sprites.setDataNumber(healchar, "x", randint(10, 140))
+        sprites.setDataNumber(healchar, "y", -50)
+    }
+    dx = sprites.readDataNumber(healchar, "x") - healchar.x
+    dy = sprites.readDataNumber(healchar, "y") - healchar.y
+    tmp1 = Math.sqrt(dx * dx + dy * dy)
+    if (dx < 0) {
+        if (is_left) {
+            is_left = false
+            animation.runImageAnimation(
+            healchar,
+            [img`
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . b 5 5 b . . . . . . . . . 
+                . . . . b b b b b b . . . . . . 
+                . . . b 5 5 5 5 5 b b . . . . . 
+                . . b 5 5 5 5 5 5 5 b b b b b . 
+                . . b 5 5 5 5 5 5 5 5 b 5 d b . 
+                . . f 4 d 5 f 1 d 5 b 5 5 b . . 
+                . . c 4 4 5 f f 1 b 5 5 d b . . 
+                . b 4 4 4 4 b f d 5 5 5 b d b b 
+                b 4 4 4 4 4 4 5 b 5 5 d c d d b 
+                . b 5 5 5 5 5 5 5 b c c d d d c 
+                . b 5 5 5 5 5 5 5 d d d d d b c 
+                . b d 5 5 5 5 5 d d d d d d c . 
+                . . b b 5 5 5 d d d d d b c . . 
+                . . . b b c c c c c c c c . . . 
+                `,img`
+                . . . . . . . . . . . . . . . . 
+                . . . b 5 b . . . . . . . . . . 
+                . . . . b 5 b . . . . . . . . . 
+                . . . . b b b b b b . . . . . . 
+                . . . b 5 5 5 5 5 b b . . . . . 
+                . . b 5 5 5 5 5 5 5 b b b b b . 
+                . . b 5 5 5 5 5 5 5 5 b 5 d b . 
+                . . f 4 d 5 f 1 d 5 b 5 5 b . . 
+                . . c 4 4 5 f f 1 b 5 5 d b . . 
+                b 4 4 4 4 4 b f d 5 5 5 b d b b 
+                . b 4 4 4 4 4 5 b 5 5 d c d d b 
+                . b 5 5 5 5 5 5 5 b c c d d d c 
+                . b 5 5 5 5 5 5 5 d d d d d b c 
+                . b d 5 5 5 5 5 d d d d d d c . 
+                . . b b 5 5 5 d d d d d b c . . 
+                . . . b b c c c c c c c c . . . 
+                `,img`
+                . . . b 5 b . . . . . . . . . . 
+                . . . . b 5 b . . . . . . . . . 
+                . . . . . c b . . . . . . . . . 
+                . . . . b b b b b b . . . . . . 
+                . . . b 5 5 5 5 5 b b . . . . . 
+                . . f d 5 5 f 1 d 5 b b . . . . 
+                . . c 4 d 5 f f 1 5 5 b . . . . 
+                . . 4 4 d d b f d 5 5 b . . . . 
+                b 4 4 4 4 4 5 5 5 d b b d d d b 
+                . b 4 4 4 4 4 5 5 b 5 5 5 d b b 
+                . . b 5 5 5 5 5 d 5 5 5 5 c d b 
+                . b 5 5 5 5 5 5 b 5 5 d c d d c 
+                . b 5 5 5 5 5 5 5 b c c d d b c 
+                . b d 5 5 5 5 5 d d d d d d c . 
+                . . b b 5 5 5 d d d d d b c . . 
+                . . . b b c c c c c c c c . . . 
+                `,img`
+                . . . b 5 b . . . . . . . . . . 
+                . . . . b 5 b . . . . . . . . . 
+                . . . . b b b b b b . . . . . . 
+                . . . b 5 5 5 5 5 b b . . . . . 
+                . . c 4 d 5 f 1 d 5 b b . . . . 
+                b 4 4 4 d d f f 1 5 5 b . . . . 
+                . b 4 4 4 4 b f d 5 5 b . . . . 
+                . . b 4 4 4 4 5 5 5 5 d b . . . 
+                . . b 5 5 5 5 5 5 5 5 d d b . . 
+                . b 5 5 5 5 5 5 5 5 d d d d b . 
+                . b 5 5 5 5 5 5 5 b b b d d d b 
+                . b 5 5 5 5 5 5 c d 5 5 b d d c 
+                . b 5 5 5 5 5 5 d c d 5 d b b c 
+                . b d 5 5 5 5 5 d d c b 5 5 b . 
+                . . b b 5 5 5 d d d d c c c b b 
+                . . . b b c c c c c c c c . . . 
+                `,img`
+                . . . b 5 b . . . . . . . . . . 
+                . . . . b 5 b . . . . . . . . . 
+                . . . . b b b b b b . . . . . . 
+                . . . b 5 5 5 5 5 b b . . . . . 
+                . . c 4 d 5 f 1 d 5 b b . . . . 
+                b 4 4 4 d d f f 1 5 5 b . . . . 
+                . b 4 4 4 4 b f d 5 5 b . . . . 
+                . . b 4 4 4 4 5 5 5 5 d b . . . 
+                . . b 5 5 5 5 5 5 5 d d d b b . 
+                . b 5 5 5 5 5 5 5 b b b d d d b 
+                . b 5 5 5 5 5 5 c d 5 5 b d d c 
+                . b 5 5 5 5 5 5 d c d 5 d b b c 
+                . b 5 5 5 5 5 5 d d c b 5 5 b c 
+                . b d 5 5 5 5 5 d d d c c c b b 
+                . . b b 5 5 5 d d d c c . . . . 
+                . . . b b c c c c c . . . . . . 
+                `,img`
+                . . . b 5 b . . . . . . . . . . 
+                . . . . b 5 b . . . . . . . . . 
+                . . . . b b b b b b . . . . . . 
+                . . . b 5 5 5 5 5 b b . . . . . 
+                . . f d 5 5 f 1 d 5 b b . . . . 
+                . . c 4 d 5 f f 1 5 5 b . . . . 
+                . . 4 4 d d b f d 5 5 b . . . . 
+                b 4 4 4 4 4 5 5 5 5 5 d b b b . 
+                . b 4 4 4 4 4 5 5 d b b d d d b 
+                . . b 5 5 5 5 5 5 b 5 5 5 d b b 
+                . b 5 5 5 5 5 5 d 5 5 5 5 c d c 
+                . b 5 5 5 5 5 5 b 5 5 d c d b c 
+                . b d 5 5 5 5 5 d b c c d d c . 
+                . . b b 5 5 5 d d d d d b c . . 
+                . . . b b c c c c c c c c . . . 
+                . . . . . . . . . . . . . . . . 
+                `],
+            100,
+            true
+            )
+        }
+    } else {
+        if (!(is_left)) {
+            is_left = true
+            animation.runImageAnimation(
+            healchar,
+            [img`
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . b 5 5 b . . . 
+                . . . . . . b b b b b b . . . . 
+                . . . . . b b 5 5 5 5 5 b . . . 
+                . b b b b b 5 5 5 5 5 5 5 b . . 
+                . b d 5 b 5 5 5 5 5 5 5 5 b . . 
+                . . b 5 5 b 5 d 1 f 5 d 4 f . . 
+                . . b d 5 5 b 1 f f 5 4 4 c . . 
+                b b d b 5 5 5 d f b 4 4 4 4 b . 
+                b d d c d 5 5 b 5 4 4 4 4 4 4 b 
+                c d d d c c b 5 5 5 5 5 5 5 b . 
+                c b d d d d d 5 5 5 5 5 5 5 b . 
+                . c d d d d d d 5 5 5 5 5 d b . 
+                . . c b d d d d d 5 5 5 b b . . 
+                . . . c c c c c c c c b b . . . 
+                `,img`
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . b 5 b . . . 
+                . . . . . . . . . b 5 b . . . . 
+                . . . . . . b b b b b b . . . . 
+                . . . . . b b 5 5 5 5 5 b . . . 
+                . b b b b b 5 5 5 5 5 5 5 b . . 
+                . b d 5 b 5 5 5 5 5 5 5 5 b . . 
+                . . b 5 5 b 5 d 1 f 5 d 4 f . . 
+                . . b d 5 5 b 1 f f 5 4 4 c . . 
+                b b d b 5 5 5 d f b 4 4 4 4 4 b 
+                b d d c d 5 5 b 5 4 4 4 4 4 b . 
+                c d d d c c b 5 5 5 5 5 5 5 b . 
+                c b d d d d d 5 5 5 5 5 5 5 b . 
+                . c d d d d d d 5 5 5 5 5 d b . 
+                . . c b d d d d d 5 5 5 b b . . 
+                . . . c c c c c c c c b b . . . 
+                `,img`
+                . . . . . . . . . . b 5 b . . . 
+                . . . . . . . . . b 5 b . . . . 
+                . . . . . . . . . b c . . . . . 
+                . . . . . . b b b b b b . . . . 
+                . . . . . b b 5 5 5 5 5 b . . . 
+                . . . . b b 5 d 1 f 5 5 d f . . 
+                . . . . b 5 5 1 f f 5 d 4 c . . 
+                . . . . b 5 5 d f b d d 4 4 . . 
+                b d d d b b d 5 5 5 4 4 4 4 4 b 
+                b b d 5 5 5 b 5 5 4 4 4 4 4 b . 
+                b d c 5 5 5 5 d 5 5 5 5 5 b . . 
+                c d d c d 5 5 b 5 5 5 5 5 5 b . 
+                c b d d c c b 5 5 5 5 5 5 5 b . 
+                . c d d d d d d 5 5 5 5 5 d b . 
+                . . c b d d d d d 5 5 5 b b . . 
+                . . . c c c c c c c c b b . . . 
+                `,img`
+                . . . . . . . . . . b 5 b . . . 
+                . . . . . . . . . b 5 b . . . . 
+                . . . . . . b b b b b b . . . . 
+                . . . . . b b 5 5 5 5 5 b . . . 
+                . . . . b b 5 d 1 f 5 d 4 c . . 
+                . . . . b 5 5 1 f f d d 4 4 4 b 
+                . . . . b 5 5 d f b 4 4 4 4 b . 
+                . . . b d 5 5 5 5 4 4 4 4 b . . 
+                . . b d d 5 5 5 5 5 5 5 5 b . . 
+                . b d d d d 5 5 5 5 5 5 5 5 b . 
+                b d d d b b b 5 5 5 5 5 5 5 b . 
+                c d d b 5 5 d c 5 5 5 5 5 5 b . 
+                c b b d 5 d c d 5 5 5 5 5 5 b . 
+                . b 5 5 b c d d 5 5 5 5 5 d b . 
+                b b c c c d d d d 5 5 5 b b . . 
+                . . . c c c c c c c c b b . . . 
+                `,img`
+                . . . . . . . . . . b 5 b . . . 
+                . . . . . . . . . b 5 b . . . . 
+                . . . . . . b b b b b b . . . . 
+                . . . . . b b 5 5 5 5 5 b . . . 
+                . . . . b b 5 d 1 f 5 d 4 c . . 
+                . . . . b 5 5 1 f f d d 4 4 4 b 
+                . . . . b 5 5 d f b 4 4 4 4 b . 
+                . . . b d 5 5 5 5 4 4 4 4 b . . 
+                . b b d d d 5 5 5 5 5 5 5 b . . 
+                b d d d b b b 5 5 5 5 5 5 5 b . 
+                c d d b 5 5 d c 5 5 5 5 5 5 b . 
+                c b b d 5 d c d 5 5 5 5 5 5 b . 
+                c b 5 5 b c d d 5 5 5 5 5 5 b . 
+                b b c c c d d d 5 5 5 5 5 d b . 
+                . . . . c c d d d 5 5 5 b b . . 
+                . . . . . . c c c c c b b . . . 
+                `,img`
+                . . . . . . . . . . b 5 b . . . 
+                . . . . . . . . . b 5 b . . . . 
+                . . . . . . b b b b b b . . . . 
+                . . . . . b b 5 5 5 5 5 b . . . 
+                . . . . b b 5 d 1 f 5 5 d f . . 
+                . . . . b 5 5 1 f f 5 d 4 c . . 
+                . . . . b 5 5 d f b d d 4 4 . . 
+                . b b b d 5 5 5 5 5 4 4 4 4 4 b 
+                b d d d b b d 5 5 4 4 4 4 4 b . 
+                b b d 5 5 5 b 5 5 5 5 5 5 b . . 
+                c d c 5 5 5 5 d 5 5 5 5 5 5 b . 
+                c b d c d 5 5 b 5 5 5 5 5 5 b . 
+                . c d d c c b d 5 5 5 5 5 d b . 
+                . . c b d d d d d 5 5 5 b b . . 
+                . . . c c c c c c c c b b . . . 
+                . . . . . . . . . . . . . . . . 
+                `],
+            100,
+            true
+            )
+        }
+    }
+    if (tmp1 > 5) {
+        healchar.x += dx * 0.02
+        healchar.y += dy * 0.02
+    } else {
+        if (HEAL_MAX_MOVE <= sprites.readDataNumber(healchar, "move_count")) {
+            sprites.destroy(healchar)
+            is_healchar = false
+        } else {
+            sprites.setDataNumber(healchar, "x", randint(10, 140))
+            sprites.setDataNumber(healchar, "y", randint(10, 50))
+            sprites.changeDataNumberBy(healchar, "move_count", 1)
+        }
+    }
+}
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (game_state == 1) {
         if (controller.B.isPressed()) {
@@ -596,6 +965,7 @@ function init () {
     ENEMY32_SPEED = 10
     ENEMY3_POINT = 10
     JITTER_AMP = 1
+    HEAL_MAX_MOVE = 15
     BULLET1_SPEED = 100
     BULLET1_ATTACK = 5
     BULLET2_SPEED = 100
@@ -1398,7 +1768,6 @@ let enemy2: Sprite = null
 let tower_statusbar_hp: StatusBarSprite = null
 let enemy1: Sprite = null
 let tmp2 = 0
-let tmp1 = 0
 let spreadTheta = 0
 let child: Sprite = null
 let BOMB_AIRTIME = 0
@@ -1413,9 +1782,9 @@ let ENEMY1_HP = 0
 let difficulty = 0
 let BULLET1_SPEED = 0
 let bullet1: Sprite = null
+let tmp1 = 0
+let HEAL_MAX_MOVE = 0
 let MAX_MP = 0
-let TOWER_MAXHP = 0
-let tower_hp = 0
 let tower2: Sprite = null
 let freq = 0
 let game_state = 0
@@ -1448,6 +1817,11 @@ let bullet2_size = 0
 let artillery: Sprite = null
 let target: Sprite = null
 let bullet2_fired = false
+let healchar: Sprite = null
+let is_left = false
+let is_healchar = false
+let TOWER_MAXHP = 0
+let tower_hp = 0
 let heart2: Sprite = null
 let hearts: Sprite[] = []
 let tower_statusbar_mp: StatusBarSprite = null
@@ -1464,9 +1838,11 @@ let x0 = 0
 let ENEMY31_HP = 0
 let enemy3: Sprite = null
 gamestart()
+healchar_appear()
 game.onUpdate(function () {
     if (game_state == 1) {
         enemy3_update()
+        healchar_update()
         if (tower_hp < 0) {
             game_state = -1
             game.setGameOverMessage(false, "GAME OVER!")
@@ -1483,8 +1859,7 @@ game.onUpdateInterval(2000, function () {
     }
 })
 forever(function () {
-    enemy1_appear()
-    pause(500)
+	
 })
 game.onUpdateInterval(100, function () {
     if (game_state == 1) {
